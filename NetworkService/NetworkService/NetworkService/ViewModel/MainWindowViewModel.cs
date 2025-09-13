@@ -1,9 +1,12 @@
-﻿using NetworkService.MVVM;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
-using NetworkService.ViewModel;
+using System.Windows;
+using NetworkService.MVVM;
+using NetworkService.Views;
 
 namespace NetworkService.ViewModel
 {
@@ -53,7 +56,7 @@ namespace NetworkService.ViewModel
         {
             NavCommand = new MyICommand<string>(OnNav);
             HomeCommand = new MyICommand(OnHome);
-            UndoCommand = new MyICommand(OnUndo, CanUndo);
+            UndoCommand = new MyICommand(OnUndo); // Removed CanUndo - always enabled now
         }
 
         private void OnNav(string destination)
@@ -84,13 +87,8 @@ namespace NetworkService.ViewModel
         private void OnUndo()
         {
             // TODO: Implement undo functionality
-            // This will be a stack-based system for undoing actions
-        }
-
-        private bool CanUndo()
-        {
-            // TODO: Return true if there are actions to undo
-            return false; // Placeholder
+            MessageBox.Show("Undo functionality will be implemented soon!", "Coming Soon",
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         #endregion
@@ -156,11 +154,6 @@ namespace NetworkService.ViewModel
     }
 
     #region Placeholder ViewModels (to be implemented later)
-
-    public class NetworkEntitiesViewModel : BindableBase
-    {
-        // Table view with entities, add/delete functionality
-    }
 
     public class NetworkDisplayViewModel : BindableBase
     {

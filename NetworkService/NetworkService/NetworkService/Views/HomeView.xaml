@@ -8,10 +8,10 @@
              d:DesignHeight="750" d:DesignWidth="600">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="20">
+        <StackPanel Margin="20,10,20,10">
 
             <!-- Welcome Header -->
-            <Border Background="#5E81AC" CornerRadius="10" Padding="20">
+            <Border Background="#5E81AC" CornerRadius="10" Padding="20" Margin="0,0,0,10">
                 <StackPanel>
                     <TextBlock Text="🏠 Welcome to Network Service" 
                               FontSize="24" 
@@ -32,7 +32,8 @@
                     BorderBrush="#D8DEE9" 
                     BorderThickness="1" 
                     CornerRadius="8" 
-                    Padding="20">
+                    Padding="20"
+                    Margin="0,0,0,10">
                 <StackPanel>
                     <TextBlock Text="📱 Mobile Interface Guide" 
                               FontSize="18" 
@@ -109,7 +110,8 @@
                         BorderBrush="#D8DEE9" 
                         BorderThickness="1" 
                         CornerRadius="8" 
-                        Padding="15">
+                        Padding="15"
+                        Margin="0,0,0,10">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="📈" FontSize="32" VerticalAlignment="Center" Margin="0,0,15,0"/>
                         <StackPanel>
@@ -129,7 +131,8 @@
             <!-- Status Info -->
             <Border Background="#EBCB8B" 
                     CornerRadius="8" 
-                    Padding="15">
+                    Padding="15"
+                    Margin="0,0,0,10">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="⚡" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <StackPanel>

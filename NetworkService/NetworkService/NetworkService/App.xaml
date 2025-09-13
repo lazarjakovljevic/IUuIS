@@ -22,14 +22,7 @@
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:NetworkEntitiesViewModel}">
-            <!-- Will be implemented in next step -->
-            <Border Background="{StaticResource BackgroundColor}" Padding="20">
-                <TextBlock Text="Network Entities View - Coming Soon!" 
-                          FontSize="18" 
-                          HorizontalAlignment="Center" 
-                          VerticalAlignment="Center"
-                          Foreground="{StaticResource TextColor}"/>
-            </Border>
+            <views:NetworkEntitiesView/>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:NetworkDisplayViewModel}">
