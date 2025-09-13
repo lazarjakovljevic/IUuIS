@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using NetworkService.ViewModel;
 
 namespace NetworkService.ViewModel
 {
@@ -155,11 +156,6 @@ namespace NetworkService.ViewModel
     }
 
     #region Placeholder ViewModels (to be implemented later)
-
-    public class HomeViewModel : BindableBase
-    {
-        // Welcome screen with instructions
-    }
 
     public class NetworkEntitiesViewModel : BindableBase
     {
