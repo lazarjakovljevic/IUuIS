@@ -1,26 +1,102 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using NetworkService.MVVM;
+using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace NetworkService.ViewModel
 {
-    public class MainWindowViewModel
+    public class MainWindowViewModel : BindableBase
     {
-        private int count = 15; // Inicijalna vrednost broja objekata u sistemu
-                                // ######### ZAMENITI stvarnim brojem elemenata
-                                //           zavisno od broja entiteta u listi
+        #region Properties
+
+        private BindableBase currentViewModel;
+        public BindableBase CurrentViewModel
+        {
+            get { return currentViewModel; }
+            set { SetProperty(ref currentViewModel, value); }
+        }
+
+        #endregion
+
+        #region Commands
+
+        public MyICommand<string> NavCommand { get; private set; }
+        public MyICommand HomeCommand { get; private set; }
+        public MyICommand UndoCommand { get; private set; }
+
+        #endregion
+
+        #region TCP Communication
+
+        private int count = 15; // Initial number of objects in system
+
+        #endregion
+
+        #region Constructor
 
         public MainWindowViewModel()
         {
-            createListener(); //Povezivanje sa serverskom aplikacijom
+            InitializeCommands();
+            CreateListener(); // TCP connection setup
+
+            // Set initial view to home
+            CurrentViewModel = new HomeViewModel();
         }
 
-        private void createListener()
+        #endregion
+
+        #region Command Implementations
+
+        private void InitializeCommands()
+        {
+            NavCommand = new MyICommand<string>(OnNav);
+            HomeCommand = new MyICommand(OnHome);
+            UndoCommand = new MyICommand(OnUndo, CanUndo);
+        }
+
+        private void OnNav(string destination)
+        {
+            switch (destination?.ToLower())
+            {
+                case "entities":
+                    CurrentViewModel = new NetworkEntitiesViewModel();
+                    break;
+                case "display":
+                    CurrentViewModel = new NetworkDisplayViewModel();
+                    break;
+                case "graph":
+                    CurrentViewModel = new MeasurementGraphViewModel();
+                    break;
+                case "home":
+                default:
+                    CurrentViewModel = new HomeViewModel();
+                    break;
+            }
+        }
+
+        private void OnHome()
+        {
+            CurrentViewModel = new HomeViewModel();
+        }
+
+        private void OnUndo()
+        {
+            // TODO: Implement undo functionality
+            // This will be a stack-based system for undoing actions
+        }
+
+        private bool CanUndo()
+        {
+            // TODO: Return true if there are actions to undo
+            return false; // Placeholder
+        }
+
+        #endregion
+
+        #region TCP Server Implementation
+
+        private void CreateListener()
         {
             var tcp = new TcpListener(IPAddress.Any, 25675);
             tcp.Start();
@@ -32,34 +108,29 @@ namespace NetworkService.ViewModel
                     var tcpClient = tcp.AcceptTcpClient();
                     ThreadPool.QueueUserWorkItem(param =>
                     {
-                        //Prijem poruke
+                        // Receive message
                         NetworkStream stream = tcpClient.GetStream();
-                        string incomming;
+                        string incoming;
                         byte[] bytes = new byte[1024];
                         int i = stream.Read(bytes, 0, bytes.Length);
-                        //Primljena poruka je sacuvana u incomming stringu
-                        incomming = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                        // Received message is saved in incoming string
+                        incoming = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
 
-                        //Ukoliko je primljena poruka pitanje koliko objekata ima u sistemu -> odgovor
-                        if (incomming.Equals("Need object count"))
+                        // If received message is asking how many objects are in system -> response
+                        if (incoming.Equals("Need object count"))
                         {
-                            //Response
-                            /* Umesto sto se ovde salje count.ToString(), potrebno je poslati 
-                             * duzinu liste koja sadrzi sve objekte pod monitoringom, odnosno
-                             * njihov ukupan broj (NE BROJATI OD NULE, VEC POSLATI UKUPAN BROJ)
-                             * */
+                            // Response - send count of monitored objects
                             Byte[] data = System.Text.Encoding.ASCII.GetBytes(count.ToString());
                             stream.Write(data, 0, data.Length);
                         }
                         else
                         {
-                            //U suprotnom, server je poslao promenu stanja nekog objekta u sistemu
-                            Console.WriteLine(incomming); //Na primer: "Entitet_1:272"
+                            // Otherwise, server sent state change of some object in system
+                            Console.WriteLine(incoming); // For example: "Entitet_1:272"
 
-                            //################ IMPLEMENTACIJA ####################
-                            // Obraditi poruku kako bi se dobile informacije o izmeni
-                            // Azuriranje potrebnih stvari u aplikaciji
-
+                            // TODO: Process message to get information about the change
+                            // Update necessary things in application
+                            ProcessIncomingMeasurement(incoming);
                         }
                     }, null);
                 }
@@ -68,5 +139,42 @@ namespace NetworkService.ViewModel
             listeningThread.IsBackground = true;
             listeningThread.Start();
         }
+
+        private void ProcessIncomingMeasurement(string message)
+        {
+            // TODO: Implement processing of incoming measurements
+            // Format: "Entitet_ID:Value"
+            // This should:
+            // 1. Parse the message
+            // 2. Update entity value
+            // 3. Log to file
+            // 4. Update UI if entity is displayed
+        }
+
+        #endregion
     }
+
+    #region Placeholder ViewModels (to be implemented later)
+
+    public class HomeViewModel : BindableBase
+    {
+        // Welcome screen with instructions
+    }
+
+    public class NetworkEntitiesViewModel : BindableBase
+    {
+        // Table view with entities, add/delete functionality
+    }
+
+    public class NetworkDisplayViewModel : BindableBase
+    {
+        // Drag&Drop grid with visual entities
+    }
+
+    public class MeasurementGraphViewModel : BindableBase
+    {
+        // Bar chart showing last 5 measurements
+    }
+
+    #endregion
 }
