@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Windows;
 using NetworkService.MVVM;
-using NetworkService.Views;
+using NetworkService.Model;
+using NetworkService.Services;
 
 namespace NetworkService.ViewModel
 {
@@ -21,6 +21,9 @@ namespace NetworkService.ViewModel
             set { SetProperty(ref currentViewModel, value); }
         }
 
+        // Shared entities collection for all ViewModels
+        public static ObservableCollection<PowerConsumptionEntity> SharedEntities { get; set; }
+
         #endregion
 
         #region Commands
@@ -33,7 +36,8 @@ namespace NetworkService.ViewModel
 
         #region TCP Communication
 
-        private int count = 15; // Initial number of objects in system
+        private int count = 3; // Initial number of objects in system
+        private MeasurementService measurementService;
 
         #endregion
 
@@ -41,11 +45,43 @@ namespace NetworkService.ViewModel
 
         public MainWindowViewModel()
         {
+            InitializeSharedData();
             InitializeCommands();
+            InitializeServices();
             CreateListener(); // TCP connection setup
 
             // Set initial view to home
             CurrentViewModel = new HomeViewModel();
+        }
+
+        #endregion
+
+        #region Initialization
+
+        private void InitializeSharedData()
+        {
+            if (SharedEntities == null)
+            {
+                SharedEntities = new ObservableCollection<PowerConsumptionEntity>();
+                LoadInitialEntities();
+            }
+        }
+
+        private void LoadInitialEntities()
+        {
+            // Load some initial entities
+            SharedEntities.Add(new PowerConsumptionEntity(0, "Main Building Meter", EntityType.SmartMeter) { CurrentValue = 1.2 });
+            SharedEntities.Add(new PowerConsumptionEntity(1, "Workshop Meter", EntityType.IntervalMeter) { CurrentValue = 2.1 });
+            SharedEntities.Add(new PowerConsumptionEntity(2, "Office Complex", EntityType.SmartMeter) { CurrentValue = 0.8 });
+        }
+
+        private void InitializeServices()
+        {
+            measurementService = MeasurementService.Instance;
+
+            // Subscribe to measurement service events
+            measurementService.MeasurementReceived += OnMeasurementReceived;
+            measurementService.AlertTriggered += OnAlertTriggered;
         }
 
         #endregion
@@ -56,7 +92,7 @@ namespace NetworkService.ViewModel
         {
             NavCommand = new MyICommand<string>(OnNav);
             HomeCommand = new MyICommand(OnHome);
-            UndoCommand = new MyICommand(OnUndo); // Removed CanUndo - always enabled now
+            UndoCommand = new MyICommand(OnUndo);
         }
 
         private void OnNav(string destination)
@@ -86,7 +122,6 @@ namespace NetworkService.ViewModel
 
         private void OnUndo()
         {
-            // TODO: Implement undo functionality
             MessageBox.Show("Undo functionality will be implemented soon!", "Coming Soon",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -97,63 +132,143 @@ namespace NetworkService.ViewModel
 
         private void CreateListener()
         {
-            var tcp = new TcpListener(IPAddress.Any, 25675);
-            tcp.Start();
-
-            var listeningThread = new Thread(() =>
+            try
             {
-                while (true)
+                var tcp = new TcpListener(IPAddress.Any, 25675);
+                tcp.Start();
+
+                var listeningThread = new Thread(() =>
                 {
-                    var tcpClient = tcp.AcceptTcpClient();
-                    ThreadPool.QueueUserWorkItem(param =>
+                    try
                     {
-                        // Receive message
-                        NetworkStream stream = tcpClient.GetStream();
-                        string incoming;
-                        byte[] bytes = new byte[1024];
-                        int i = stream.Read(bytes, 0, bytes.Length);
-                        // Received message is saved in incoming string
-                        incoming = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-
-                        // If received message is asking how many objects are in system -> response
-                        if (incoming.Equals("Need object count"))
+                        while (true)
                         {
-                            // Response - send count of monitored objects
-                            Byte[] data = System.Text.Encoding.ASCII.GetBytes(count.ToString());
-                            stream.Write(data, 0, data.Length);
-                        }
-                        else
-                        {
-                            // Otherwise, server sent state change of some object in system
-                            Console.WriteLine(incoming); // For example: "Entitet_1:272"
+                            var tcpClient = tcp.AcceptTcpClient();
+                            ThreadPool.QueueUserWorkItem(param =>
+                            {
+                                try
+                                {
+                                    // Receive message
+                                    NetworkStream stream = tcpClient.GetStream();
+                                    string incoming;
+                                    byte[] bytes = new byte[1024];
+                                    int i = stream.Read(bytes, 0, bytes.Length);
+                                    incoming = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
 
-                            // TODO: Process message to get information about the change
-                            // Update necessary things in application
-                            ProcessIncomingMeasurement(incoming);
-                        }
-                    }, null);
-                }
-            });
+                                    // Process different message types
+                                    if (incoming.Equals("Need object count"))
+                                    {
+                                        // Response - send count of monitored objects
+                                        int currentCount = SharedEntities?.Count ?? count;
+                                        byte[] data = System.Text.Encoding.ASCII.GetBytes(currentCount.ToString());
+                                        stream.Write(data, 0, data.Length);
 
-            listeningThread.IsBackground = true;
-            listeningThread.Start();
+                                        Console.WriteLine($"Sent object count: {currentCount}");
+                                    }
+                                    else if (incoming.StartsWith("Entitet_") && incoming.Contains(":"))
+                                    {
+                                        // Measurement data received
+                                        Console.WriteLine($"Received measurement: {incoming}");
+
+                                        // Process through measurement service
+                                        measurementService.ProcessTcpMessage(incoming, SharedEntities);
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"Unknown message received: {incoming}");
+                                        measurementService.LogError($"Unknown TCP message: {incoming}");
+                                    }
+
+                                    stream.Close();
+                                    tcpClient.Close();
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"Error handling TCP client: {ex.Message}");
+                                    measurementService.LogError($"TCP client error: {ex.Message}");
+                                }
+                            }, null);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error in TCP listener: {ex.Message}");
+                        measurementService.LogError($"TCP listener error: {ex.Message}");
+                    }
+                });
+
+                listeningThread.IsBackground = true;
+                listeningThread.Start();
+
+                Console.WriteLine("TCP Server started on port 25675");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error starting TCP server: {ex.Message}", "TCP Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        private void ProcessIncomingMeasurement(string message)
+        #endregion
+
+        #region Event Handlers
+
+        private void OnMeasurementReceived(PowerConsumptionEntity entity, double value)
         {
-            // TODO: Implement processing of incoming measurements
-            // Format: "Entitet_ID:Value"
-            // This should:
-            // 1. Parse the message
-            // 2. Update entity value
-            // 3. Log to file
-            // 4. Update UI if entity is displayed
+            // This runs on background thread, so we need to dispatch to UI thread
+            Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    // 4 SATA KASNIJE OVO JEDINO RADI, AMIN
+                    if (CurrentViewModel is NetworkEntitiesViewModel entitiesViewModel)
+                    {
+                        var entities = entitiesViewModel.Entities;
+                        var index = entities.IndexOf(entity);
+
+                        if (index >= 0)
+                        {
+                            // Remove and re-add to force DataGrid update
+                            entities.RemoveAt(index);
+                            entities.Insert(index, entity);
+
+                            // Also refresh the filtered view
+                            entitiesViewModel.FilteredEntities?.Refresh();
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error updating UI: {ex.Message}");
+                }
+            }));
+        }
+
+        private void OnAlertTriggered(string alertMessage)
+        {
+            // Show alert on UI thread
+            Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                MessageBox.Show(alertMessage, "Measurement Alert",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }));
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        public static void UpdateEntityCount()
+        {
+            // This method can be called when entities are added/removed
+            // to notify other components about count changes
         }
 
         #endregion
     }
 
-    #region Placeholder ViewModels (to be implemented later)
+    #region Other ViewModels
 
     public class NetworkDisplayViewModel : BindableBase
     {

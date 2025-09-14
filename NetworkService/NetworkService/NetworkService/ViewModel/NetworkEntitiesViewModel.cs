@@ -211,9 +211,9 @@ namespace NetworkService.ViewModel
         private void LoadSampleData()
         {
             // Sample entities for testing
-            Entities.Add(new PowerConsumptionEntity(1, "Main Building Meter", EntityType.SmartMeter) { CurrentValue = 1.2 });
-            Entities.Add(new PowerConsumptionEntity(2, "Workshop Meter", EntityType.IntervalMeter) { CurrentValue = 2.1 });
-            Entities.Add(new PowerConsumptionEntity(3, "Office Complex", EntityType.SmartMeter) { CurrentValue = 0.8 });
+            Entities.Add(new PowerConsumptionEntity(0, "Main Building Meter", EntityType.SmartMeter) { CurrentValue = 1.2 });
+            Entities.Add(new PowerConsumptionEntity(1, "Workshop Meter", EntityType.IntervalMeter) { CurrentValue = 2.1 });
+            Entities.Add(new PowerConsumptionEntity(2, "Office Complex", EntityType.SmartMeter) { CurrentValue = 0.8 });
         }
 
         private void SetupFiltering()

@@ -5,13 +5,14 @@ namespace NetworkService.MVVM
 {
     public class BindableBase : INotifyPropertyChanged
     {
-        protected virtual void SetProperty<T>(ref T member, T val,
+        protected virtual bool SetProperty<T>(ref T member, T val,
            [CallerMemberName] string propertyName = null)
         {
-            if (object.Equals(member, val)) return;
+            if (object.Equals(member, val)) return false;
 
             member = val;
             PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            return true;
         }
 
         protected virtual void OnPropertyChanged(string propertyName)

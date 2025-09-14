@@ -60,6 +60,7 @@
     <Compile Include="MVVM\BindableBase.cs" />
     <Compile Include="MVVM\MyICommand.cs" />
     <Compile Include="MVVM\ViewModelLocator.cs" />
+    <Compile Include="Services\MeasurementService.cs" />
     <Compile Include="ViewModel\HomeViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\NetworkEntitiesViewModel.cs" />
