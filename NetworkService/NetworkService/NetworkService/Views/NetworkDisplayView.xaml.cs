@@ -82,13 +82,13 @@ namespace NetworkService.Views
 
         private void Canvas_Drop(object sender, DragEventArgs e)
         {
-            var canvas = sender as Canvas;
+            var targetCanvas = sender as Canvas;
 
             if (e.Data.GetDataPresent(typeof(PowerConsumptionEntity)))
             {
                 var entity = e.Data.GetData(typeof(PowerConsumptionEntity)) as PowerConsumptionEntity;
 
-                if (entity != null && canvas != null && !canvasEntityMap.ContainsKey(canvas))
+                if (entity != null && targetCanvas != null && !canvasEntityMap.ContainsKey(targetCanvas))
                 {
                     // Remove entity from previous canvas if it was already placed
                     var previousCanvas = canvasEntityMap.FirstOrDefault(x => x.Value.Id == entity.Id).Key;
@@ -98,7 +98,7 @@ namespace NetworkService.Views
                     }
 
                     // Place entity on new canvas
-                    PlaceEntityOnCanvas(canvas, entity);
+                    PlaceEntityOnCanvas(targetCanvas, entity);
                 }
             }
 
@@ -119,7 +119,7 @@ namespace NetworkService.Views
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    RemoveEntityFromCanvas(canvas);
+                    RemoveEntityFromCanvas(canvas, returnToTree: true); // Vrati u TreeView
                 }
             }
         }
@@ -139,6 +139,9 @@ namespace NetworkService.Views
             // Add to canvas
             canvas.Children.Add(entityVisual);
 
+            // Make the entity visual draggable
+            entityVisual.MouseLeftButtonDown += EntityOnCanvas_MouseLeftButtonDown;
+
             // Track entity placement
             canvasEntityMap[canvas] = entity;
 
@@ -152,7 +155,7 @@ namespace NetworkService.Views
             Console.WriteLine($"Placed entity {entity.Name} on canvas {canvas.Name}");
         }
 
-        private void RemoveEntityFromCanvas(Canvas canvas)
+        private void RemoveEntityFromCanvas(Canvas canvas, bool returnToTree = true)
         {
             if (canvasEntityMap.ContainsKey(canvas))
             {
@@ -189,9 +192,13 @@ namespace NetworkService.Views
                 // Remove from tracking
                 canvasEntityMap.Remove(canvas);
 
-                // Add entity back to TreeView
-                var viewModel = this.DataContext as NetworkService.ViewModel.NetworkDisplayViewModel;
-                viewModel?.AddEntityToTree(entity);
+                // Add entity back to TreeView only if explicitly requested
+                if (returnToTree)
+                {
+                    var viewModel = this.DataContext as NetworkService.ViewModel.NetworkDisplayViewModel;
+                    viewModel?.AddEntityToTree(entity);
+                }
+
 
                 Console.WriteLine($"Removed entity {entity.Name} from canvas {canvas.Name}");
             }
@@ -275,8 +282,32 @@ namespace NetworkService.Views
         }
 
         #endregion
+        private void EntityOnCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (isDragging) return;
 
-        
+            var entityVisual = sender as StackPanel;
+            if (entityVisual == null) return;
+
+            // Find which canvas contains this entity
+            var sourceCanvas = canvasEntityMap.FirstOrDefault(x =>
+                x.Key.Children.OfType<Border>().Any(b => b.Child == entityVisual)).Key;
+
+            if (sourceCanvas != null && canvasEntityMap.ContainsKey(sourceCanvas))
+            {
+                var entity = canvasEntityMap[sourceCanvas];
+                isDragging = true;
+                draggedEntity = entity;
+
+                // Start drag & drop operation
+                DragDrop.DoDragDrop(entityVisual, entity, DragDropEffects.Move);
+
+                // Reset drag state
+                isDragging = false;
+                draggedEntity = null;
+            }
+        }
+
     }
 
 

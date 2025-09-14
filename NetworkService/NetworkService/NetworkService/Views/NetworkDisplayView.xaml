@@ -123,7 +123,7 @@
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            MouseRightButtonDown="Canvas_MouseRightButtonDown" MouseLeftButtonDown="Canvas_0_0_MouseLeftButtonDown">
                         <Border BorderBrush="#D8DEE9" 
                                 BorderThickness="2"
                                 Width="110" 
