@@ -101,17 +101,18 @@ namespace NetworkService.ViewModel
 
         private void OnNav(string destination)
         {
+            if (CurrentViewModel is NetworkDisplayViewModel && networkDisplayView != null)
+            {
+                networkDisplayView.SaveCurrentState();
+            }
+
             switch (destination?.ToLower())
             {
                 case "entities":
                     CurrentViewModel = new NetworkEntitiesViewModel();
                     break;
                 case "display":
-                    var displayViewModel = new NetworkDisplayViewModel();
-                    CurrentViewModel = displayViewModel;
-
-                    // Store reference to the view for connection updates
-                    // This will be set when the view is actually created
+                    CurrentViewModel = NetworkDisplayViewModel.Instance;
                     break;
                 case "graph":
                     CurrentViewModel = new MeasurementGraphViewModel();
@@ -171,6 +172,18 @@ namespace NetworkService.ViewModel
                                         byte[] data = System.Text.Encoding.ASCII.GetBytes(currentCount.ToString());
                                         stream.Write(data, 0, data.Length);
 
+                                        Console.WriteLine($"Sent object count: {currentCount}");
+                                    }
+                                    else if (incoming.StartsWith("Entitet_") && incoming.Contains(":"))
+                                    {
+                                        // Measurement data received
+                                        Console.WriteLine($"Received measurement: {incoming}");
+
+                                        // Process through measurement service
+                                        measurementService.ProcessTcpMessage(incoming, SharedEntities);
+                                    }
+                                    else
+                                    {
                                         Console.WriteLine($"Unknown message received: {incoming}");
                                         measurementService.LogError($"Unknown TCP message: {incoming}");
                                     }

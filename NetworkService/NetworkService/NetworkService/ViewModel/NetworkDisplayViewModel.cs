@@ -1,5 +1,8 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Collections.Generic;
+using System.Windows.Controls;
 using NetworkService.MVVM;
 using NetworkService.Model;
 using NetworkService.Views;
@@ -8,6 +11,33 @@ namespace NetworkService.ViewModel
 {
     public class NetworkDisplayViewModel : BindableBase
     {
+        #region Singleton Pattern
+
+        private static NetworkDisplayViewModel instance;
+        public static NetworkDisplayViewModel Instance
+        {
+            get
+            {
+                if (instance == null)
+                    instance = new NetworkDisplayViewModel();
+                return instance;
+            }
+        }
+
+        // Private constructor for singleton
+        private NetworkDisplayViewModel()
+        {
+            LoadGroupedEntities();
+
+            // Subscribe to changes in shared entities
+            if (SharedEntities != null)
+            {
+                SharedEntities.CollectionChanged += OnSharedEntitiesChanged;
+            }
+        }
+
+        #endregion
+
         #region Properties
 
         private ObservableCollection<EntityGroup> groupedEntities;
@@ -25,17 +55,51 @@ namespace NetworkService.ViewModel
 
         #endregion
 
-        #region Constructor
+        #region State Persistence
 
-        public NetworkDisplayViewModel()
+        private Dictionary<string, PowerConsumptionEntity> savedCanvasState;
+
+        public Dictionary<string, PowerConsumptionEntity> SavedCanvasState
         {
-            LoadGroupedEntities();
+            get { return savedCanvasState ?? (savedCanvasState = new Dictionary<string, PowerConsumptionEntity>()); }
+        }
 
-            // Subscribe to changes in shared entities
-            if (SharedEntities != null)
+        /// <summary>
+        /// Čuva trenutno stanje Canvas-a
+        /// </summary>
+        public void SaveCanvasState(Dictionary<Canvas, PowerConsumptionEntity> canvasEntityMap)
+        {
+            SavedCanvasState.Clear();
+            foreach (var kvp in canvasEntityMap)
             {
-                SharedEntities.CollectionChanged += OnSharedEntitiesChanged;
+                if (kvp.Value != null)
+                {
+                    SavedCanvasState[kvp.Key.Name] = kvp.Value;
+                }
             }
+            Console.WriteLine($"Saved state for {SavedCanvasState.Count} entities");
+        }
+
+        /// <summary>
+        /// Vraća sačuvano stanje Canvas-a
+        /// </summary>
+        public void RestoreCanvasState(Dictionary<Canvas, PowerConsumptionEntity> allCanvases,
+                                      Action<Canvas, PowerConsumptionEntity> placeEntityCallback)
+        {
+            foreach (var kvp in SavedCanvasState)
+            {
+                var canvas = allCanvases.Keys.FirstOrDefault(c => c.Name == kvp.Key);
+                if (canvas != null && kvp.Value != null)
+                {
+                    // Check if entity still exists in shared collection
+                    var currentEntity = SharedEntities.FirstOrDefault(e => e.Id == kvp.Value.Id);
+                    if (currentEntity != null)
+                    {
+                        placeEntityCallback(canvas, currentEntity);
+                    }
+                }
+            }
+            Console.WriteLine($"Restored state for {SavedCanvasState.Count} entities");
         }
 
         #endregion
@@ -56,7 +120,7 @@ namespace NetworkService.ViewModel
                 {
                     var smartGroup = new EntityGroup("Smart Meters");
                     foreach (var meter in smartMeters)
-                        smartGroup.Entities.Add(meter);  
+                        smartGroup.Entities.Add(meter);
                     GroupedEntities.Add(smartGroup);
                 }
 
@@ -64,7 +128,7 @@ namespace NetworkService.ViewModel
                 {
                     var intervalGroup = new EntityGroup("Interval Meters");
                     foreach (var meter in intervalMeters)
-                        intervalGroup.Entities.Add(meter);  // Umesto AddRange
+                        intervalGroup.Entities.Add(meter);
                     GroupedEntities.Add(intervalGroup);
                 }
             }
@@ -107,6 +171,11 @@ namespace NetworkService.ViewModel
                 group.Entities.Add(entity);
                 // Refresh group count
                 OnPropertyChanged(nameof(GroupedEntities));
+            }
+            else
+            {
+                // If group doesn't exist, refresh all groupings
+                LoadGroupedEntities();
             }
         }
 

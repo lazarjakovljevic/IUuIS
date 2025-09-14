@@ -1,4 +1,7 @@
-﻿using System;
+﻿using NetworkService.Model;
+using NetworkService.Services;
+using NetworkService.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -6,8 +9,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using NetworkService.Model;
-using NetworkService.Services;
 
 namespace NetworkService.Views
 {
@@ -19,7 +20,7 @@ namespace NetworkService.Views
         private bool isDragging = false;
         private Dictionary<Canvas, PowerConsumptionEntity> canvasEntityMap;
         private ConnectionManager connectionManager;
-        private Canvas lineCanvas; 
+        private Canvas lineCanvas;
 
         #endregion
 
@@ -30,8 +31,59 @@ namespace NetworkService.Views
             InitializeComponent();
             InitializeComponents();
 
-            // Set DataContext to ViewModel
-            this.DataContext = new NetworkService.ViewModel.NetworkDisplayViewModel();
+            // Use singleton ViewModel to preserve state
+            this.DataContext = NetworkDisplayViewModel.Instance;
+
+            RegisterForUpdates();
+
+            // Restore saved state
+            RestoreViewState();
+        }
+
+        private void RegisterForUpdates()
+        {
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var mainWindow = Application.Current.MainWindow;
+                if (mainWindow?.DataContext is MainWindowViewModel mainViewModel)
+                {
+                    mainViewModel.RegisterNetworkDisplayView(this);
+                }
+            }));
+        }
+
+        private void RestoreViewState()
+        {
+            var viewModel = this.DataContext as NetworkDisplayViewModel;
+            if (viewModel != null)
+            {
+                var allCanvases = GetAllCanvases();
+                viewModel.RestoreCanvasState(allCanvases, PlaceEntityOnCanvas);
+
+                // Restore connections
+                CreateAutomaticConnections();
+
+                Console.WriteLine($"Restored view state with {canvasEntityMap.Count} entities");
+            }
+        }
+
+        private Dictionary<Canvas, PowerConsumptionEntity> GetAllCanvases()
+        {
+            var allCanvases = new Dictionary<Canvas, PowerConsumptionEntity>();
+            var networkGrid = this.FindName("NetworkGrid") as Grid;
+
+            foreach (Canvas canvas in networkGrid.Children.OfType<Canvas>())
+            {
+                allCanvases[canvas] = null; // Will be filled by restore
+            }
+
+            return allCanvases;
+        }
+
+        public void SaveCurrentState()
+        {
+            var viewModel = this.DataContext as NetworkDisplayViewModel;
+            viewModel?.SaveCanvasState(canvasEntityMap);
         }
 
         #endregion
@@ -288,21 +340,6 @@ namespace NetworkService.Views
                 Margin = new Thickness(0, 0, 0, 2),
                 Foreground = entity.IsValueValid ? new SolidColorBrush(Colors.Green) : new SolidColorBrush(Colors.Red)
             };
-
-            // Connection count indicator
-            var connectionCount = connectionManager?.GetConnectionCountForEntity(entity) ?? 0;
-            if (connectionCount > 0)
-            {
-                var connectionIndicator = new TextBlock
-                {
-                    Text = $"🔗{connectionCount}",
-                    FontSize = 8,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    Foreground = Brushes.Blue,
-                    Margin = new Thickness(0, 2, 0, 0)
-                };
-                visual.Children.Add(connectionIndicator);
-            }
 
             visual.Children.Add(image);
             visual.Children.Add(idAndValue);
