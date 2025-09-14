@@ -197,50 +197,43 @@ namespace NetworkService.Views
             }
         }
 
-        private FrameworkElement CreateEntityVisual(PowerConsumptionEntity entity)
+        private StackPanel CreateEntityVisual(PowerConsumptionEntity entity)
         {
-            var container = new Grid
-            {
-                Width = 120,
-                Height = 120
-            };
-
-            var stack = new StackPanel
+            var visual = new StackPanel
             {
                 Orientation = Orientation.Vertical,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             };
 
+            // Entity image 
             var image = new Image
             {
                 Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(entity.Type.ImagePath, UriKind.RelativeOrAbsolute)),
                 Width = 100,
                 Height = 100,
-                Stretch = Stretch.Uniform,
-                Margin = new Thickness(0, 2, 0, 0), 
-                HorizontalAlignment = HorizontalAlignment.Center
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 5),
+                Stretch = Stretch.Uniform
             };
 
-            // Tekst
-            var nameAndValue = new TextBlock
+            // ID and Current Value with color based on validity
+            var idAndValue = new TextBlock
             {
-                Text = "ID: " + entity.Id + "   " + entity.CurrentValue + " kWh",
+                Text = $"ID: {entity.Id}   {entity.CurrentValue:F2} kWh",
                 FontSize = 10,
                 FontWeight = FontWeights.SemiBold,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.Wrap,
-                MaxWidth = 120,
-                Margin = new Thickness(0,5,0,0),
-                Foreground = Brushes.DarkSlateGray
+                MaxWidth = 110,
+                Foreground = entity.IsValueValid ? new SolidColorBrush(Colors.Green) : new SolidColorBrush(Colors.Red)          
             };
 
-            stack.Children.Add(image);
-            stack.Children.Add(nameAndValue);
+            visual.Children.Add(image);
+            visual.Children.Add(idAndValue);
 
-            container.Children.Add(stack);
-            return container;
+            return visual;
         }
 
         private void UpdateCanvasAppearance(Canvas canvas, PowerConsumptionEntity entity)

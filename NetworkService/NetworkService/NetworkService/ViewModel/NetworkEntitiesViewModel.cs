@@ -175,7 +175,6 @@ namespace NetworkService.ViewModel
         {
             InitializeCollections();
             InitializeCommands();
-            LoadSampleData();
             SetupFiltering();
         }
 
@@ -185,14 +184,14 @@ namespace NetworkService.ViewModel
 
         private void InitializeCollections()
         {
-            Entities = new ObservableCollection<PowerConsumptionEntity>();
+            Entities = MainWindowViewModel.SharedEntities;
+
             AvailableTypes = new ObservableCollection<EntityType>
             {
                 EntityType.IntervalMeter,
                 EntityType.SmartMeter
             };
 
-            // Add "All Types" option for filter
             FilterTypes = new ObservableCollection<EntityType>
             {
                 new EntityType("All Types", ""),
@@ -208,13 +207,6 @@ namespace NetworkService.ViewModel
             ClearFiltersCommand = new MyICommand(OnClearFilters);
         }
 
-        private void LoadSampleData()
-        {
-            // Sample entities for testing
-            Entities.Add(new PowerConsumptionEntity(0, "Main Building Meter", EntityType.SmartMeter) { CurrentValue = 1.2 });
-            Entities.Add(new PowerConsumptionEntity(1, "Workshop Meter", EntityType.IntervalMeter) { CurrentValue = 2.1 });
-            Entities.Add(new PowerConsumptionEntity(2, "Office Complex", EntityType.SmartMeter) { CurrentValue = 0.8 });
-        }
 
         private void SetupFiltering()
         {
