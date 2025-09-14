@@ -1,4 +1,5 @@
 ﻿using NetworkService.Model;
+using NetworkService.MVVM;
 using NetworkService.Services;
 using NetworkService.ViewModel;
 using System;
@@ -108,13 +109,8 @@ namespace NetworkService.Views
 
             if (lineCanvas == null)
             {
-                Console.WriteLine("ERROR: ConnectionLinesCanvas not found in XAML!");
                 // Fallback
                 lineCanvas = new Canvas { Background = Brushes.Transparent, IsHitTestVisible = false };
-            }
-            else
-            {
-                Console.WriteLine("SUCCESS: Found ConnectionLinesCanvas from XAML");
             }
         }
         #endregion
@@ -247,7 +243,9 @@ namespace NetworkService.Views
                 viewModel?.RemoveEntityFromTree(entity);
             }
 
-            Console.WriteLine($"Placed entity {entity.Name} on canvas {canvas.Name}");
+            //Console.WriteLine($"Placed entity {entity.Name} on canvas {canvas.Name}");
+
+            UpdateButtonStates();
         }
 
         private void RemoveEntityFromCanvas(Canvas canvas, bool returnToTree = true)
@@ -276,7 +274,9 @@ namespace NetworkService.Views
                 // Update remaining connections
                 CreateAutomaticConnections();
 
-                Console.WriteLine($"Removed entity {entity.Name} from canvas {canvas.Name}");
+                //Console.WriteLine($"Removed entity {entity.Name} from canvas {canvas.Name}");
+
+                UpdateButtonStates();
             }
         }
 
@@ -376,6 +376,8 @@ namespace NetworkService.Views
 
             // Update all visuals to show connection count
             RefreshEntityVisuals();
+
+            UpdateButtonStates();
         }
 
 
@@ -499,9 +501,6 @@ namespace NetworkService.Views
             return $"Entities: {entitiesCount}, Connections: {connectionsCount}, Valid: {validEntities}, Invalid: {invalidEntities}";
         }
 
-        /// <summary>
-        /// Toggle connection display (show/hide all lines)
-        /// </summary>
         public void ToggleConnectionDisplay()
         {
             if (lineCanvas != null)
@@ -516,9 +515,6 @@ namespace NetworkService.Views
 
         #region Cleanup
 
-        /// <summary>
-        /// Clean up resources when view is disposed
-        /// </summary>
         public void Cleanup()
         {
             if (connectionManager != null)
@@ -531,17 +527,115 @@ namespace NetworkService.Views
             canvasEntityMap?.Clear();
         }
 
+
+
         #endregion
- 
+
+        #region Button Event Handlers
+
+        private void ToggleConnectionsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleConnectionDisplay();
+        }
+
+        private void ClearNetworkButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!CanClearNetwork())
+                return;
+
+            var result = MessageBox.Show(
+                "Are you sure you want to remove all entities from the network?",
+                "Clear Network",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                ClearNetwork();
+            }
+        }
+
+        private bool CanClearNetwork()
+        {
+            return canvasEntityMap.Count > 0;
+        }
+
+        private bool CanToggleConnections()
+        {
+            return connectionManager.Connections.Count > 0;
+        }
+
+        #endregion
+
+        private void UpdateButtonStates()
+        {
+            var toggleButton = this.FindName("ToggleConnectionsButton") as Button;
+            var clearButton = this.FindName("ClearNetworkButton") as Button;
+
+            if (toggleButton != null)
+            {
+                toggleButton.IsEnabled = CanToggleConnections();
+            }
+
+            if (clearButton != null)
+            {
+                clearButton.IsEnabled = CanClearNetwork();
+            }
+        }
+
+        private void ClearNetwork()
+        {
+            // Return all entities to TreeView
+            var entitiesToReturn = canvasEntityMap.Values.ToList();
+
+            foreach (var entity in entitiesToReturn)
+            {
+                var canvas = canvasEntityMap.FirstOrDefault(x => x.Value.Id == entity.Id).Key;
+                if (canvas != null)
+                {
+                    RemoveEntityFromCanvas(canvas, returnToTree: true);
+                }
+            }
+
+            // Clear all connections
+            connectionManager.ClearAllConnections();
+
+            // Update connection count
+            if (this.FindName("ConnectionStatusText") is TextBlock statusText)
+            {
+                statusText.Text = "0 connections";
+            }
+
+            UpdateButtonStates();
+        }
+
+        
+
     }
 
     #region Helper Classes
 
     // Helper class for TreeView grouping
-    public class EntityGroup
+    public class EntityGroup : BindableBase
     {
         public string TypeName { get; set; }
-        public ObservableCollection<PowerConsumptionEntity> Entities { get; set; }
+
+        private ObservableCollection<PowerConsumptionEntity> entities;
+        public ObservableCollection<PowerConsumptionEntity> Entities
+        {
+            get { return entities; }
+            set
+            {
+                if (entities != null)
+                    entities.CollectionChanged -= OnEntitiesChanged;
+
+                SetProperty(ref entities, value);
+
+                if (entities != null)
+                    entities.CollectionChanged += OnEntitiesChanged;
+            }
+        }
+
         public int Count => Entities?.Count ?? 0;
 
         public EntityGroup(string typeName)
@@ -549,7 +643,11 @@ namespace NetworkService.Views
             TypeName = typeName;
             Entities = new ObservableCollection<PowerConsumptionEntity>();
         }
-    }
 
+        private void OnEntitiesChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(Count));
+        }
+    }
     #endregion
 }

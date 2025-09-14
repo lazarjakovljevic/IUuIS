@@ -411,7 +411,7 @@
                             Foreground="White" 
                             Height="30" 
                             BorderThickness="0" 
-                           
+                            Click="ToggleConnectionsButton_Click"
                             Cursor="Hand"
                             Margin="0,0,5,0"
                             ToolTip="Show/Hide connection lines"/>
@@ -423,7 +423,7 @@
                             Foreground="White" 
                             Height="30" 
                             BorderThickness="0" 
-                            
+                            Click="ClearNetworkButton_Click"
                             Cursor="Hand"
                             Margin="5,0,0,0"
                             ToolTip="Remove all entities from network"/>

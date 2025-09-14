@@ -153,8 +153,7 @@ namespace NetworkService.ViewModel
                 if (group.Entities.Contains(entity))
                 {
                     group.Entities.Remove(entity);
-                    // Refresh group count
-                    OnPropertyChanged(nameof(GroupedEntities));
+                  
                     break;
                 }
             }
@@ -169,8 +168,7 @@ namespace NetworkService.ViewModel
             if (group != null)
             {
                 group.Entities.Add(entity);
-                // Refresh group count
-                OnPropertyChanged(nameof(GroupedEntities));
+
             }
             else
             {
