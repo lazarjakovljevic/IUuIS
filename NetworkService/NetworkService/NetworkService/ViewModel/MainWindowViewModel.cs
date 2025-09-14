@@ -269,12 +269,6 @@ namespace NetworkService.ViewModel
     }
 
     #region Other ViewModels
-
-    public class NetworkDisplayViewModel : BindableBase
-    {
-        // Drag&Drop grid with visual entities
-    }
-
     public class MeasurementGraphViewModel : BindableBase
     {
         // Bar chart showing last 5 measurements

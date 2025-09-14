@@ -63,9 +63,13 @@
     <Compile Include="Services\MeasurementService.cs" />
     <Compile Include="ViewModel\HomeViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
+    <Compile Include="ViewModel\NetworkDisplayViewModel.cs" />
     <Compile Include="ViewModel\NetworkEntitiesViewModel.cs" />
     <Compile Include="Views\HomeView.xaml.cs">
       <DependentUpon>HomeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NetworkDisplayView.xaml.cs">
+      <DependentUpon>NetworkDisplayView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\NetworkEntitiesView.xaml.cs">
       <DependentUpon>NetworkEntitiesView.xaml</DependentUpon>
@@ -83,6 +87,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\HomeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\NetworkDisplayView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -117,6 +125,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\Images\intervalMeter.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\smartMeter.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

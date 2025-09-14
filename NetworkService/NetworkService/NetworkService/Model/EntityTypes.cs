@@ -36,8 +36,8 @@ namespace NetworkService.Model
         #endregion
 
         #region Static predefined types
-        public static EntityType IntervalMeter => new EntityType("Interval Meter", "/Resources/Images/interval_meter.png");
-        public static EntityType SmartMeter => new EntityType("Smart Meter", "/Resources/Images/smart_meter.png");
+        public static EntityType IntervalMeter => new EntityType("Interval Meter", "/Resources/Images/intervalMeter.png");
+        public static EntityType SmartMeter => new EntityType("Smart Meter", "/Resources/Images/smartMeter.png");
         #endregion
 
         #region Helpers
