@@ -94,7 +94,7 @@ namespace NetworkService.Views
                     var previousCanvas = canvasEntityMap.FirstOrDefault(x => x.Value.Id == entity.Id).Key;
                     if (previousCanvas != null)
                     {
-                        RemoveEntityFromCanvas(previousCanvas);
+                        RemoveEntityFromCanvas(previousCanvas, returnToTree: false);
                     }
 
                     // Place entity on new canvas
@@ -119,7 +119,7 @@ namespace NetworkService.Views
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    RemoveEntityFromCanvas(canvas, returnToTree: true); // Vrati u TreeView
+                    RemoveEntityFromCanvas(canvas, returnToTree: true);
                 }
             }
         }
@@ -136,10 +136,8 @@ namespace NetworkService.Views
             // Create entity visual representation
             var entityVisual = CreateEntityVisual(entity);
 
-            // Add to canvas
+            // Add to canvas and enable dragging from canvas
             canvas.Children.Add(entityVisual);
-
-            // Make the entity visual draggable
             entityVisual.MouseLeftButtonDown += EntityOnCanvas_MouseLeftButtonDown;
 
             // Track entity placement
@@ -148,9 +146,12 @@ namespace NetworkService.Views
             // Update canvas appearance
             UpdateCanvasAppearance(canvas, entity);
 
-            // Remove entity from TreeView
+            // Remove entity from TreeView only if it came from TreeView
             var viewModel = this.DataContext as NetworkService.ViewModel.NetworkDisplayViewModel;
-            viewModel?.RemoveEntityFromTree(entity);
+            if (viewModel?.SharedEntities.Contains(entity) == true)
+            {
+                viewModel?.RemoveEntityFromTree(entity);
+            }
 
             Console.WriteLine($"Placed entity {entity.Name} on canvas {canvas.Name}");
         }
@@ -163,45 +164,48 @@ namespace NetworkService.Views
 
                 // Clear canvas and restore original appearance
                 canvas.Children.Clear();
-
-                // Restore original border and background
-                var border = new Border
-                {
-                    BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D8DEE9")),
-                    BorderThickness = new Thickness(2),
-                    Width = 110,
-                    Height = 130,
-                    CornerRadius = new CornerRadius(8)
-                };
-
-                var hint = new TextBlock
-                {
-                    Text = "Drop Here",
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontSize = 12,
-                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4C566A"))
-                };
-
-                border.Child = hint;
-                canvas.Children.Add(border);
-
-                // Reset canvas background
-                canvas.Background = Brushes.Transparent;
+                RestoreCanvasDefaultAppearance(canvas);
 
                 // Remove from tracking
                 canvasEntityMap.Remove(canvas);
 
-                // Add entity back to TreeView only if explicitly requested
+                // Add entity back to TreeView if requested
                 if (returnToTree)
                 {
                     var viewModel = this.DataContext as NetworkService.ViewModel.NetworkDisplayViewModel;
                     viewModel?.AddEntityToTree(entity);
                 }
 
-
                 Console.WriteLine($"Removed entity {entity.Name} from canvas {canvas.Name}");
             }
+        }
+
+        private void RestoreCanvasDefaultAppearance(Canvas canvas)
+        {
+            // Restore original border and background
+            var border = new Border
+            {
+                BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D8DEE9")),
+                BorderThickness = new Thickness(2),
+                Width = 110,
+                Height = 130,
+                CornerRadius = new CornerRadius(8)
+            };
+
+            var hint = new TextBlock
+            {
+                Text = "Drop Here",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 12,
+                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4C566A"))
+            };
+
+            border.Child = hint;
+            canvas.Children.Add(border);
+
+            // Reset canvas background
+            canvas.Background = Brushes.Transparent;
         }
 
         private StackPanel CreateEntityVisual(PowerConsumptionEntity entity)
@@ -210,7 +214,8 @@ namespace NetworkService.Views
             {
                 Orientation = Orientation.Vertical,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                Cursor = Cursors.Hand
             };
 
             // Entity image 
@@ -234,7 +239,7 @@ namespace NetworkService.Views
                 TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.Wrap,
                 MaxWidth = 110,
-                Foreground = entity.IsValueValid ? new SolidColorBrush(Colors.Green) : new SolidColorBrush(Colors.Red)          
+                Foreground = entity.IsValueValid ? new SolidColorBrush(Colors.Green) : new SolidColorBrush(Colors.Red)
             };
 
             visual.Children.Add(image);
@@ -245,23 +250,10 @@ namespace NetworkService.Views
 
         private void UpdateCanvasAppearance(Canvas canvas, PowerConsumptionEntity entity)
         {
-            // Find the border in canvas children
-            var border = canvas.Children.OfType<Border>().FirstOrDefault();
-            if (border != null)
-            {
-                // Change border color based on entity validity
-                if (entity.IsValueValid)
-                {
-                    border.BorderBrush = new SolidColorBrush(Colors.Green);  
-                }
-                else
-                {
-                    border.BorderBrush = new SolidColorBrush(Colors.Red);   
-                }
 
-                // Keep background transparent
-                canvas.Background = Brushes.Transparent;
-            }
+            // Keep background transparent
+            canvas.Background = Brushes.Transparent;
+
         }
 
         #endregion
@@ -282,16 +274,24 @@ namespace NetworkService.Views
         }
 
         #endregion
-        private void EntityOnCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+       private void EntityOnCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (isDragging) return;
 
             var entityVisual = sender as StackPanel;
             if (entityVisual == null) return;
 
-            // Find which canvas contains this entity
-            var sourceCanvas = canvasEntityMap.FirstOrDefault(x =>
-                x.Key.Children.OfType<Border>().Any(b => b.Child == entityVisual)).Key;
+            // Find which canvas contains this entity by searching through all canvases
+            Canvas sourceCanvas = null;
+            foreach (var kvp in canvasEntityMap)
+            {
+                // Check if this canvas contains our entity visual
+                if (kvp.Key.Children.Contains(entityVisual))
+                {
+                    sourceCanvas = kvp.Key;
+                    break;
+                }
+            }
 
             if (sourceCanvas != null && canvasEntityMap.ContainsKey(sourceCanvas))
             {
