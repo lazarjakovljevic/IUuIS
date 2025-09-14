@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -144,6 +145,10 @@ namespace NetworkService.Views
             // Update canvas appearance
             UpdateCanvasAppearance(canvas, entity);
 
+            // Remove entity from TreeView
+            var viewModel = this.DataContext as NetworkService.ViewModel.NetworkDisplayViewModel;
+            viewModel?.RemoveEntityFromTree(entity);
+
             Console.WriteLine($"Placed entity {entity.Name} on canvas {canvas.Name}");
         }
 
@@ -153,7 +158,7 @@ namespace NetworkService.Views
             {
                 var entity = canvasEntityMap[canvas];
 
-                // Clear canvas
+                // Clear canvas and restore original appearance
                 canvas.Children.Clear();
 
                 // Restore original border and background
@@ -183,6 +188,12 @@ namespace NetworkService.Views
 
                 // Remove from tracking
                 canvasEntityMap.Remove(canvas);
+
+                // Add entity back to TreeView
+                var viewModel = this.DataContext as NetworkService.ViewModel.NetworkDisplayViewModel;
+                viewModel?.AddEntityToTree(entity);
+
+                Console.WriteLine($"Removed entity {entity.Name} from canvas {canvas.Name}");
             }
         }
 
@@ -207,14 +218,14 @@ namespace NetworkService.Views
                 Width = 100,
                 Height = 100,
                 Stretch = Stretch.Uniform,
-                Margin = new Thickness(0, 2, 0, 0), // pomera sliku gore
+                Margin = new Thickness(0, 2, 0, 0), 
                 HorizontalAlignment = HorizontalAlignment.Center
             };
 
             // Tekst
             var nameAndValue = new TextBlock
             {
-                Text = entity.Name,
+                Text = "ID: " + entity.Id + "   " + entity.CurrentValue + " kWh",
                 FontSize = 10,
                 FontWeight = FontWeights.SemiBold,
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -234,12 +245,21 @@ namespace NetworkService.Views
 
         private void UpdateCanvasAppearance(Canvas canvas, PowerConsumptionEntity entity)
         {
-            if (entity.IsValueValid)
+            // Find the border in canvas children
+            var border = canvas.Children.OfType<Border>().FirstOrDefault();
+            if (border != null)
             {
-                canvas.Background = Brushes.Transparent;
-            }
-            else
-            {
+                // Change border color based on entity validity
+                if (entity.IsValueValid)
+                {
+                    border.BorderBrush = new SolidColorBrush(Colors.Green);  
+                }
+                else
+                {
+                    border.BorderBrush = new SolidColorBrush(Colors.Red);   
+                }
+
+                // Keep background transparent
                 canvas.Background = Brushes.Transparent;
             }
         }
@@ -262,7 +282,11 @@ namespace NetworkService.Views
         }
 
         #endregion
+
+        
     }
+
+
 
     #region Helper Classes
 
@@ -270,13 +294,13 @@ namespace NetworkService.Views
     public class EntityGroup
     {
         public string TypeName { get; set; }
-        public List<PowerConsumptionEntity> Entities { get; set; }
+        public ObservableCollection<PowerConsumptionEntity> Entities { get; set; }
         public int Count => Entities?.Count ?? 0;
 
         public EntityGroup(string typeName)
         {
             TypeName = typeName;
-            Entities = new List<PowerConsumptionEntity>();
+            Entities = new ObservableCollection<PowerConsumptionEntity>();
         }
     }
 

@@ -55,14 +55,16 @@ namespace NetworkService.ViewModel
                 if (smartMeters.Any())
                 {
                     var smartGroup = new EntityGroup("Smart Meters");
-                    smartGroup.Entities.AddRange(smartMeters);
+                    foreach (var meter in smartMeters)
+                        smartGroup.Entities.Add(meter);  
                     GroupedEntities.Add(smartGroup);
                 }
 
                 if (intervalMeters.Any())
                 {
                     var intervalGroup = new EntityGroup("Interval Meters");
-                    intervalGroup.Entities.AddRange(intervalMeters);
+                    foreach (var meter in intervalMeters)
+                        intervalGroup.Entities.Add(meter);
                     GroupedEntities.Add(intervalGroup);
                 }
             }
@@ -77,6 +79,35 @@ namespace NetworkService.ViewModel
         public void RefreshGroupings()
         {
             LoadGroupedEntities();
+        }
+
+        public void RemoveEntityFromTree(PowerConsumptionEntity entity)
+        {
+            // Find and remove entity from appropriate group
+            foreach (var group in GroupedEntities)
+            {
+                if (group.Entities.Contains(entity))
+                {
+                    group.Entities.Remove(entity);
+                    // Refresh group count
+                    OnPropertyChanged(nameof(GroupedEntities));
+                    break;
+                }
+            }
+        }
+
+        public void AddEntityToTree(PowerConsumptionEntity entity)
+        {
+            // Find appropriate group and add entity back
+            var groupName = entity.Type.Name.Contains("Smart") ? "Smart Meters" : "Interval Meters";
+            var group = GroupedEntities.FirstOrDefault(g => g.TypeName == groupName);
+
+            if (group != null)
+            {
+                group.Entities.Add(entity);
+                // Refresh group count
+                OnPropertyChanged(nameof(GroupedEntities));
+            }
         }
 
         #endregion

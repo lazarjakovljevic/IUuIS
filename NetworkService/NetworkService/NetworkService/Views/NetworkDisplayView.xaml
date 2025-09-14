@@ -62,8 +62,8 @@
                             <Border Background="#F5F5F5" 
                                     BorderBrush="Transparent" 
                                     BorderThickness="1" 
-                                    CornerRadius="2" 
-                                    Padding="6,4,6,4"
+                                    CornerRadius="4" 
+                                    Padding="8,4,8,4"
                                     Margin="-10,2,0,0"
                                     MouseLeftButtonDown="Entity_MouseLeftButtonDown">
                                 <StackPanel>
@@ -79,9 +79,6 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-
-                                    <TextBlock Text="{Binding CurrentValue, StringFormat={}{0:F2} kWh}" 
-                                               FontSize="10"/>
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
