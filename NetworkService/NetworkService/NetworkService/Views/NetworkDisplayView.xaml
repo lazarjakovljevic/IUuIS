@@ -22,7 +22,7 @@
                 Padding="10"
                 Margin="0,0,5,0">
             <StackPanel>
-                <TextBlock Text="🌳 Available Entities" 
+                <TextBlock Text="Available Entities" 
                           FontSize="14" 
                           FontWeight="SemiBold" 
                           Foreground="#2E3440" 
@@ -34,35 +34,54 @@
                           BorderThickness="0"
                           Height="680">
 
-                    <!-- Group Level (EntityType) -->
                     <TreeView.Resources>
+                        <!-- Gasi plavi sistemski highlight -->
+                        <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                            <Style.Resources>
+                                <!-- Ovime “maskiraš” defaultne highlight boje -->
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
+                            </Style.Resources>
+                        </Style>
+
+                        <!-- Group Level (EntityType) -->
                         <HierarchicalDataTemplate DataType="{x:Type local:EntityGroup}" 
                                                   ItemsSource="{Binding Entities}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="📂" FontSize="14" Margin="0,0,5,0"/>
+                                <TextBlock Text="📂" FontSize="14" Margin="0,0,2,0"/>
                                 <TextBlock Text="{Binding TypeName}" FontWeight="SemiBold"/>
                                 <TextBlock Text="{Binding Count, StringFormat=' ({0})'}" 
-                                          Foreground="#4C566A" 
-                                          FontSize="11"/>
+                                           Foreground="#4C566A" 
+                                           FontSize="12"/>
                             </StackPanel>
                         </HierarchicalDataTemplate>
 
                         <!-- Entity Level -->
                         <DataTemplate DataType="{x:Type model:PowerConsumptionEntity}">
                             <Border Background="#F5F5F5" 
-                                    BorderBrush="#D8DEE9" 
+                                    BorderBrush="Transparent" 
                                     BorderThickness="1" 
-                                    CornerRadius="4" 
-                                    Padding="8"
-                                    Margin="0,2"
+                                    CornerRadius="2" 
+                                    Padding="6,4,6,4"
+                                    Margin="-10,2,0,0"
                                     MouseLeftButtonDown="Entity_MouseLeftButtonDown">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Name}" 
-                                              FontWeight="SemiBold" 
-                                              FontSize="11"/>
-                                    <TextBlock Text="{Binding Id, StringFormat='ID: {0}'}" 
-                                              FontSize="10" 
-                                              Foreground="#4C566A"/>
+                                    <TextBlock Text="{Binding Name}" FontSize="11">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontWeight" Value="Normal"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
+                                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+
+                                    <TextBlock Text="{Binding CurrentValue, StringFormat={}{0:F2} kWh}" 
+                                               FontSize="10"/>
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
@@ -103,7 +122,7 @@
                     <Canvas Grid.Row="0" Grid.Column="0" 
                             Name="Canvas_0_0"
                             Background="Transparent" 
-                            Margin="2,4,4,4" 
+                            Margin="2,8,4,4" 
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
@@ -124,7 +143,7 @@
                     <Canvas Grid.Row="0" Grid.Column="1" 
                             Name="Canvas_0_1"
                             Background="Transparent" 
-                            Margin="4" 
+                            Margin="2,8,4,4"  
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
@@ -145,7 +164,7 @@
                     <Canvas Grid.Row="0" Grid.Column="2" 
                             Name="Canvas_0_2"
                             Background="Transparent" 
-                            Margin="4,4,2,4" 
+                            Margin="2,8,4,4" 
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
@@ -167,7 +186,7 @@
                     <Canvas Grid.Row="1" Grid.Column="0" 
                             Name="Canvas_1_0"
                             Background="Transparent" 
-                            Margin="4" 
+                            Margin="2,8,4,4" 
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
@@ -189,7 +208,7 @@
                     <Canvas Grid.Row="1" Grid.Column="1" 
                             Name="Canvas_1_1"
                             Background="Transparent" 
-                            Margin="4" 
+                            Margin="2,8,4,4" 
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
@@ -211,7 +230,7 @@
                     <Canvas Grid.Row="1" Grid.Column="2" 
                             Name="Canvas_1_2"
                             Background="Transparent" 
-                            Margin="4" 
+                            Margin="2,8,4,4" 
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
@@ -234,7 +253,7 @@
                     <Canvas Grid.Row="2" Grid.Column="0" 
                             Name="Canvas_2_0"
                             Background="Transparent" 
-                            Margin="4" 
+                            Margin="2,8,4,4" 
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
@@ -256,7 +275,7 @@
                     <Canvas Grid.Row="2" Grid.Column="1" 
                             Name="Canvas_2_1"
                             Background="Transparent" 
-                            Margin="4" 
+                            Margin="2,8,4,4" 
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
@@ -278,7 +297,7 @@
                     <Canvas Grid.Row="2" Grid.Column="2" 
                             Name="Canvas_2_2"
                             Background="Transparent" 
-                            Margin="4" 
+                            Margin="2,8,4,4" 
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
@@ -301,7 +320,7 @@
                     <Canvas Grid.Row="3" Grid.Column="0" 
                             Name="Canvas_3_0"
                             Background="Transparent" 
-                            Margin="4" 
+                            Margin="2,8,4,4" 
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
@@ -323,7 +342,7 @@
                     <Canvas Grid.Row="3" Grid.Column="1" 
                             Name="Canvas_3_1"
                             Background="Transparent" 
-                            Margin="4" 
+                            Margin="2,8,4,4" 
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"
@@ -345,7 +364,7 @@
                     <Canvas Grid.Row="3" Grid.Column="2" 
                             Name="Canvas_3_2"
                             Background="Transparent" 
-                            Margin="4" 
+                            Margin="2,8,4,4" 
                             AllowDrop="True"
                             DragOver="Canvas_DragOver"
                             Drop="Canvas_Drop"

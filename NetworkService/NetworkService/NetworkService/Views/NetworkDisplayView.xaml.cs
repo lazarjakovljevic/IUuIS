@@ -25,6 +25,9 @@ namespace NetworkService.Views
         {
             InitializeComponent();
             canvasEntityMap = new Dictionary<Canvas, PowerConsumptionEntity>();
+
+            // Set DataContext to ViewModel
+            this.DataContext = new NetworkService.ViewModel.NetworkDisplayViewModel();
         }
 
         #endregion
@@ -153,95 +156,91 @@ namespace NetworkService.Views
                 // Clear canvas
                 canvas.Children.Clear();
 
-                // Add back drop hint
+                // Restore original border and background
+                var border = new Border
+                {
+                    BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D8DEE9")),
+                    BorderThickness = new Thickness(2),
+                    Width = 110,
+                    Height = 130,
+                    CornerRadius = new CornerRadius(8)
+                };
+
                 var hint = new TextBlock
                 {
                     Text = "Drop Here",
-                    FontSize = 10,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontSize = 12,
                     Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4C566A"))
                 };
-                Canvas.SetLeft(hint, 20);
-                Canvas.SetTop(hint, 40);
-                canvas.Children.Add(hint);
 
-                // Reset canvas appearance
-                canvas.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ECEFF4"));
+                border.Child = hint;
+                canvas.Children.Add(border);
+
+                // Reset canvas background
+                canvas.Background = Brushes.Transparent;
 
                 // Remove from tracking
                 canvasEntityMap.Remove(canvas);
-
-                Console.WriteLine($"Removed entity {entity.Name} from canvas {canvas.Name}");
             }
         }
 
-        private StackPanel CreateEntityVisual(PowerConsumptionEntity entity)
+        private FrameworkElement CreateEntityVisual(PowerConsumptionEntity entity)
         {
-            var visual = new StackPanel
+            var container = new Grid
+            {
+                Width = 120,
+                Height = 120
+            };
+
+            var stack = new StackPanel
             {
                 Orientation = Orientation.Vertical,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             };
 
-            // Entity icon/symbol
-            var icon = new TextBlock
+            var image = new Image
             {
-                Text = entity.Type.Name.Contains("Smart") ? "🔌" : "⚡",
-                FontSize = 24,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 5)
+                Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(entity.Type.ImagePath, UriKind.RelativeOrAbsolute)),
+                Width = 100,
+                Height = 100,
+                Stretch = Stretch.Uniform,
+                Margin = new Thickness(0, 2, 0, 0), // pomera sliku gore
+                HorizontalAlignment = HorizontalAlignment.Center
             };
 
-            // Entity name
-            var name = new TextBlock
+            // Tekst
+            var nameAndValue = new TextBlock
             {
                 Text = entity.Name,
                 FontSize = 10,
                 FontWeight = FontWeights.SemiBold,
                 HorizontalAlignment = HorizontalAlignment.Center,
+                TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.Wrap,
-                MaxWidth = 80
+                MaxWidth = 120,
+                Margin = new Thickness(0,5,0,0),
+                Foreground = Brushes.DarkSlateGray
             };
 
-            // Entity ID
-            var id = new TextBlock
-            {
-                Text = $"ID: {entity.Id}",
-                FontSize = 8,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4C566A"))
-            };
+            stack.Children.Add(image);
+            stack.Children.Add(nameAndValue);
 
-            // Current value
-            var value = new TextBlock
-            {
-                Text = $"{entity.CurrentValue:F2} kWh",
-                FontSize = 9,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                FontWeight = FontWeights.SemiBold,
-                Foreground = entity.IsValueValid ?
-                    new SolidColorBrush(Colors.Green) :
-                    new SolidColorBrush(Colors.Red)
-            };
-
-            visual.Children.Add(icon);
-            visual.Children.Add(name);
-            visual.Children.Add(id);
-            visual.Children.Add(value);
-
-            return visual;
+            container.Children.Add(stack);
+            return container;
         }
 
         private void UpdateCanvasAppearance(Canvas canvas, PowerConsumptionEntity entity)
         {
-            // Change background color based on entity status
             if (entity.IsValueValid)
             {
-                canvas.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E8")); // Light green
+                canvas.Background = Brushes.Transparent;
             }
             else
             {
-                canvas.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8")); // Light red
+                canvas.Background = Brushes.Transparent;
             }
         }
 
