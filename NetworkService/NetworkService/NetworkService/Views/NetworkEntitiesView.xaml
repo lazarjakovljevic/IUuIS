@@ -140,20 +140,37 @@
                         <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,10">
                             <TextBlock Text="Filter by ID:" FontSize="12" Margin="0,0,0,5"/>
                             <StackPanel Orientation="Horizontal">
-                                <RadioButton Content="&lt;" 
-                                           IsChecked="{Binding IsLessThanSelected}" 
-                                           GroupName="IDFilter" 
-                                           Margin="0,0,10,0"/>
-                                <RadioButton Content="&gt;" 
-                                           IsChecked="{Binding IsGreaterThanSelected}" 
-                                           GroupName="IDFilter" 
-                                           Margin="0,0,10,0"/>
-                                <RadioButton Content="=" 
-                                           IsChecked="{Binding IsEqualSelected}" 
-                                           GroupName="IDFilter"/>
+                                <StackPanel Orientation="Vertical" Margin="0,0,15,0">
+                                    <RadioButton IsChecked="{Binding IsLessThanSelected}" 
+                        GroupName="IDFilter" 
+                        HorizontalAlignment="Center"/>
+                                    <TextBlock Text="&lt;" 
+                      FontSize="10" 
+                      HorizontalAlignment="Center" 
+                      Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" Margin="0,0,15,0">
+                                    <RadioButton IsChecked="{Binding IsGreaterThanSelected}" 
+                        GroupName="IDFilter" 
+                        HorizontalAlignment="Center"/>
+                                    <TextBlock Text="&gt;" 
+                      FontSize="10" 
+                      HorizontalAlignment="Center" 
+                      Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical">
+                                    <RadioButton IsChecked="{Binding IsEqualSelected}" 
+                        GroupName="IDFilter" 
+                        HorizontalAlignment="Center"/>
+                                    <TextBlock Text="=" 
+                      FontSize="10" 
+                      HorizontalAlignment="Center" 
+                      Margin="0,2,0,0"/>
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
-
                         <!-- ID Value and Clear Button -->
                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,0">
                             <TextBox Text="{Binding FilterIdValue, UpdateSourceTrigger=PropertyChanged}" 
