@@ -38,7 +38,7 @@
                         <!-- Gasi plavi sistemski highlight -->
                         <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
                             <Style.Resources>
-                                <!-- Ovime “maskiraš” defaultne highlight boje -->
+                                <!-- Ovime "maskiraš" defaultne highlight boje -->
                                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
                                 <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>
                                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
@@ -87,7 +87,7 @@
             </StackPanel>
         </Border>
 
-        <!-- Right Panel - Drag & Drop Grid -->
+        <!-- Right Panel - Drag & Drop Grid with Connection Layer -->
         <Border Grid.Column="1" 
                 Background="White" 
                 BorderBrush="#D8DEE9" 
@@ -95,292 +95,340 @@
                 CornerRadius="8" 
                 Padding="10">
             <StackPanel>
-                <TextBlock Text="🌐 Network Display Grid" 
-                          FontSize="16" 
-                          FontWeight="SemiBold" 
-                          Foreground="#2E3440" 
-                          Margin="0,0,0,10"/>
+                <!-- Header with Network Status -->
+                <Grid Margin="0,0,0,10">
+                    <TextBlock Text="🌐 Network Display Grid" 
+                              FontSize="16" 
+                              FontWeight="SemiBold" 
+                              Foreground="#2E3440" 
+                              HorizontalAlignment="Left"/>
 
-                <!-- 4x3 Grid of Canvas Elements -->
-                <Grid Name="NetworkGrid" Height="600">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="140"/>
-                        <RowDefinition Height="140"/>
-                        <RowDefinition Height="140"/>
-                        <RowDefinition Height="140"/>
-                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock Text="🔗" FontSize="12" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <TextBlock Name="ConnectionStatusText" 
+                                  Text="0 connections" 
+                                  FontSize="10" 
+                                  Foreground="#4C566A"
+                                  VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Container for Grid and Lines - Using a Canvas to overlay lines -->
+                <Canvas Name="NetworkContainer" Height="600" Width="360" Background="Transparent">
+
+                    <!-- Canvas for Connection Lines (behind entities) -->
+                    <Canvas Name="ConnectionLinesCanvas" 
+                            Height="600" 
+                            Width="360" 
+                            Background="Transparent" 
+                            IsHitTestVisible="False"
+                            Panel.ZIndex="1"/>
+
+                    <!-- 4x3 Grid of Canvas Elements (in front of lines) -->
+                    <Grid Name="NetworkGrid" Height="600" Width="360" Panel.ZIndex="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="140"/>
+                            <RowDefinition Height="140"/>
+                            <RowDefinition Height="140"/>
+                            <RowDefinition Height="140"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Row 0 -->
+                        <Canvas Grid.Row="0" Grid.Column="0" 
+                                Name="Canvas_0_0"
+                                Background="Transparent" 
+                                Margin="2,8,4,4" 
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2"
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                        <Canvas Grid.Row="0" Grid.Column="1" 
+                                Name="Canvas_0_1"
+                                Background="Transparent" 
+                                Margin="2,8,4,4"  
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2" 
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                        <Canvas Grid.Row="0" Grid.Column="2" 
+                                Name="Canvas_0_2"
+                                Background="Transparent" 
+                                Margin="2,8,4,4" 
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2" 
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                        <!-- Row 1 -->
+                        <Canvas Grid.Row="1" Grid.Column="0" 
+                                Name="Canvas_1_0"
+                                Background="Transparent" 
+                                Margin="2,8,4,4" 
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2" 
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                        <Canvas Grid.Row="1" Grid.Column="1" 
+                                Name="Canvas_1_1"
+                                Background="Transparent" 
+                                Margin="2,8,4,4" 
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2" 
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                        <Canvas Grid.Row="1" Grid.Column="2" 
+                                Name="Canvas_1_2"
+                                Background="Transparent" 
+                                Margin="2,8,4,4" 
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2" 
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                        <!-- Row 2 -->
+                        <Canvas Grid.Row="2" Grid.Column="0" 
+                                Name="Canvas_2_0"
+                                Background="Transparent" 
+                                Margin="2,8,4,4" 
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2" 
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                        <Canvas Grid.Row="2" Grid.Column="1" 
+                                Name="Canvas_2_1"
+                                Background="Transparent" 
+                                Margin="2,8,4,4" 
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2" 
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                        <Canvas Grid.Row="2" Grid.Column="2" 
+                                Name="Canvas_2_2"
+                                Background="Transparent" 
+                                Margin="2,8,4,4" 
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2" 
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                        <!-- Row 3 -->
+                        <Canvas Grid.Row="3" Grid.Column="0" 
+                                Name="Canvas_3_0"
+                                Background="Transparent" 
+                                Margin="2,8,4,4" 
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2" 
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                        <Canvas Grid.Row="3" Grid.Column="1" 
+                                Name="Canvas_3_1"
+                                Background="Transparent" 
+                                Margin="2,8,4,4" 
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2" 
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                        <Canvas Grid.Row="3" Grid.Column="2" 
+                                Name="Canvas_3_2"
+                                Background="Transparent" 
+                                Margin="2,8,4,4" 
+                                AllowDrop="True"
+                                DragOver="Canvas_DragOver"
+                                Drop="Canvas_Drop"
+                                MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                            <Border BorderBrush="#D8DEE9" 
+                                    BorderThickness="2" 
+                                    Width="110" 
+                                    Height="130" 
+                                    CornerRadius="8">
+                                <TextBlock Text="Drop Here" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          FontSize="12" 
+                                          Foreground="#4C566A"/>
+                            </Border>
+                        </Canvas>
+
+                    </Grid>
+                </Canvas>
+
+                <!-- Network Controls -->
+                <Grid Margin="0,10,0,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Row 0 -->
-                    <Canvas Grid.Row="0" Grid.Column="0" 
-                            Name="Canvas_0_0"
-                            Background="Transparent" 
-                            Margin="2,8,4,4" 
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2"
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
+                    <Button Grid.Column="0" 
+                            Name="ToggleConnectionsButton"
+                            Content="🔗 Toggle Lines" 
+                            Background="#5E81AC" 
+                            Foreground="White" 
+                            Height="30" 
+                            BorderThickness="0" 
+                           
+                            Cursor="Hand"
+                            Margin="0,0,5,0"
+                            ToolTip="Show/Hide connection lines"/>
 
-                    <Canvas Grid.Row="0" Grid.Column="1" 
-                            Name="Canvas_0_1"
-                            Background="Transparent" 
-                            Margin="2,8,4,4"  
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2" 
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
-
-                    <Canvas Grid.Row="0" Grid.Column="2" 
-                            Name="Canvas_0_2"
-                            Background="Transparent" 
-                            Margin="2,8,4,4" 
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2" 
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
-
-                    <!-- Row 1 -->
-                    <Canvas Grid.Row="1" Grid.Column="0" 
-                            Name="Canvas_1_0"
-                            Background="Transparent" 
-                            Margin="2,8,4,4" 
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2" 
-                               
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
-
-                    <Canvas Grid.Row="1" Grid.Column="1" 
-                            Name="Canvas_1_1"
-                            Background="Transparent" 
-                            Margin="2,8,4,4" 
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2" 
-                                
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
-
-                    <Canvas Grid.Row="1" Grid.Column="2" 
-                            Name="Canvas_1_2"
-                            Background="Transparent" 
-                            Margin="2,8,4,4" 
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2" 
-                                
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
-
-                    <!-- Row 2 -->
-                    <Canvas Grid.Row="2" Grid.Column="0" 
-                            Name="Canvas_2_0"
-                            Background="Transparent" 
-                            Margin="2,8,4,4" 
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2" 
-                               
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
-
-                    <Canvas Grid.Row="2" Grid.Column="1" 
-                            Name="Canvas_2_1"
-                            Background="Transparent" 
-                            Margin="2,8,4,4" 
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2" 
-                                
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
-
-                    <Canvas Grid.Row="2" Grid.Column="2" 
-                            Name="Canvas_2_2"
-                            Background="Transparent" 
-                            Margin="2,8,4,4" 
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2" 
-                                
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
-
-                    <!-- Row 3 -->
-                    <Canvas Grid.Row="3" Grid.Column="0" 
-                            Name="Canvas_3_0"
-                            Background="Transparent" 
-                            Margin="2,8,4,4" 
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2" 
-                                
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
-
-                    <Canvas Grid.Row="3" Grid.Column="1" 
-                            Name="Canvas_3_1"
-                            Background="Transparent" 
-                            Margin="2,8,4,4" 
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2" 
-                                
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
-
-                    <Canvas Grid.Row="3" Grid.Column="2" 
-                            Name="Canvas_3_2"
-                            Background="Transparent" 
-                            Margin="2,8,4,4" 
-                            AllowDrop="True"
-                            DragOver="Canvas_DragOver"
-                            Drop="Canvas_Drop"
-                            MouseRightButtonDown="Canvas_MouseRightButtonDown">
-                        <Border BorderBrush="#D8DEE9" 
-                                BorderThickness="2" 
-                                
-                                Width="110" 
-                                Height="130" 
-                                CornerRadius="8">
-                            <TextBlock Text="Drop Here" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      FontSize="12" 
-                                      Foreground="#4C566A"/>
-                        </Border>
-                    </Canvas>
-
+                    <Button Grid.Column="1" 
+                            Name="ClearNetworkButton"
+                            Content="🗑️ Clear Network" 
+                            Background="#BF616A" 
+                            Foreground="White" 
+                            Height="30" 
+                            BorderThickness="0" 
+                            
+                            Cursor="Hand"
+                            Margin="5,0,0,0"
+                            ToolTip="Remove all entities from network"/>
                 </Grid>
+
             </StackPanel>
         </Border>
 

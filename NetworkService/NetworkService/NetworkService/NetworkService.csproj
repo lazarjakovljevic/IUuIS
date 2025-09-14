@@ -55,11 +55,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\Connection.cs" />
     <Compile Include="Model\EntityTypes.cs" />
     <Compile Include="Model\PowerConsumption.cs" />
     <Compile Include="MVVM\BindableBase.cs" />
     <Compile Include="MVVM\MyICommand.cs" />
     <Compile Include="MVVM\ViewModelLocator.cs" />
+    <Compile Include="Services\ConnectionManager.cs" />
     <Compile Include="Services\MeasurementService.cs" />
     <Compile Include="ViewModel\HomeViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />

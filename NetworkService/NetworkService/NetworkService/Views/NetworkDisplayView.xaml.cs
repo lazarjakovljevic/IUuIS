@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using NetworkService.Model;
+using NetworkService.Services;
 
 namespace NetworkService.Views
 {
@@ -17,6 +18,8 @@ namespace NetworkService.Views
         private PowerConsumptionEntity draggedEntity;
         private bool isDragging = false;
         private Dictionary<Canvas, PowerConsumptionEntity> canvasEntityMap;
+        private ConnectionManager connectionManager;
+        private Canvas lineCanvas; 
 
         #endregion
 
@@ -25,7 +28,7 @@ namespace NetworkService.Views
         public NetworkDisplayView()
         {
             InitializeComponent();
-            canvasEntityMap = new Dictionary<Canvas, PowerConsumptionEntity>();
+            InitializeComponents();
 
             // Set DataContext to ViewModel
             this.DataContext = new NetworkService.ViewModel.NetworkDisplayViewModel();
@@ -33,7 +36,38 @@ namespace NetworkService.Views
 
         #endregion
 
-        #region Drag & Drop Events
+        #region Initialization
+
+        private void InitializeComponents()
+        {
+            canvasEntityMap = new Dictionary<Canvas, PowerConsumptionEntity>();
+
+            CreateLineCanvas();
+
+            connectionManager = new ConnectionManager(lineCanvas, canvasEntityMap);
+
+            connectionManager.ConnectionAdded += OnConnectionAdded;
+            connectionManager.ConnectionRemoved += OnConnectionRemoved;
+        }
+
+        private void CreateLineCanvas()
+        {
+            lineCanvas = this.FindName("ConnectionLinesCanvas") as Canvas;
+
+            if (lineCanvas == null)
+            {
+                Console.WriteLine("ERROR: ConnectionLinesCanvas not found in XAML!");
+                // Fallback
+                lineCanvas = new Canvas { Background = Brushes.Transparent, IsHitTestVisible = false };
+            }
+            else
+            {
+                Console.WriteLine("SUCCESS: Found ConnectionLinesCanvas from XAML");
+            }
+        }
+        #endregion
+
+        #region Drag & Drop Events - TreeView to Canvas
 
         private void Entity_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -55,6 +89,10 @@ namespace NetworkService.Views
                 draggedEntity = null;
             }
         }
+
+        #endregion
+
+        #region Canvas Events
 
         private void Canvas_DragOver(object sender, DragEventArgs e)
         {
@@ -99,6 +137,9 @@ namespace NetworkService.Views
 
                     // Place entity on new canvas
                     PlaceEntityOnCanvas(targetCanvas, entity);
+
+                    // Create/update connections automatically
+                    CreateAutomaticConnections();
                 }
             }
 
@@ -111,8 +152,9 @@ namespace NetworkService.Views
 
             if (canvas != null && canvasEntityMap.ContainsKey(canvas))
             {
+                var entity = canvasEntityMap[canvas];
                 var result = MessageBox.Show(
-                    $"Remove '{canvasEntityMap[canvas].Name}' from this position?",
+                    $"Remove '{entity.Name}' from this position?\nThis will also remove all connections.",
                     "Remove Entity",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
@@ -162,6 +204,9 @@ namespace NetworkService.Views
             {
                 var entity = canvasEntityMap[canvas];
 
+                // Remove all connections for this entity FIRST
+                connectionManager.RemoveConnectionsForEntity(entity);
+
                 // Clear canvas and restore original appearance
                 canvas.Children.Clear();
                 RestoreCanvasDefaultAppearance(canvas);
@@ -175,6 +220,9 @@ namespace NetworkService.Views
                     var viewModel = this.DataContext as NetworkService.ViewModel.NetworkDisplayViewModel;
                     viewModel?.AddEntityToTree(entity);
                 }
+
+                // Update remaining connections
+                CreateAutomaticConnections();
 
                 Console.WriteLine($"Removed entity {entity.Name} from canvas {canvas.Name}");
             }
@@ -215,7 +263,7 @@ namespace NetworkService.Views
                 Orientation = Orientation.Vertical,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand 
             };
 
             // Entity image 
@@ -232,15 +280,29 @@ namespace NetworkService.Views
             // ID and Current Value with color based on validity
             var idAndValue = new TextBlock
             {
-                Text = $"ID: {entity.Id}   {entity.CurrentValue:F2} kWh",
+                Text = $"ID: {entity.Id}  [{entity.CurrentValue:F2} kWh]",
                 FontSize = 10,
                 FontWeight = FontWeights.SemiBold,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 TextAlignment = TextAlignment.Center,
-                TextWrapping = TextWrapping.Wrap,
-                MaxWidth = 110,
+                Margin = new Thickness(0, 0, 0, 2),
                 Foreground = entity.IsValueValid ? new SolidColorBrush(Colors.Green) : new SolidColorBrush(Colors.Red)
             };
+
+            // Connection count indicator
+            var connectionCount = connectionManager?.GetConnectionCountForEntity(entity) ?? 0;
+            if (connectionCount > 0)
+            {
+                var connectionIndicator = new TextBlock
+                {
+                    Text = $"🔗{connectionCount}",
+                    FontSize = 8,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Foreground = Brushes.Blue,
+                    Margin = new Thickness(0, 2, 0, 0)
+                };
+                visual.Children.Add(connectionIndicator);
+            }
 
             visual.Children.Add(image);
             visual.Children.Add(idAndValue);
@@ -250,31 +312,57 @@ namespace NetworkService.Views
 
         private void UpdateCanvasAppearance(Canvas canvas, PowerConsumptionEntity entity)
         {
-
-            // Keep background transparent
-            canvas.Background = Brushes.Transparent;
-
+            canvas.Background = Brushes.Transparent;   
         }
 
         #endregion
 
-        #region Public Methods
+        #region Connection Management
 
-        public void RefreshEntityDisplays()
+        private void CreateAutomaticConnections()
         {
-            // Refresh all displayed entities with current values
+            // Clear existing connections first
+            connectionManager.ClearAllConnections();
+
+            var entitiesCount = canvasEntityMap.Count;
+
+            // Create new connections
+            connectionManager.CreateAutomaticConnections();
+
+            var connectionsCount = connectionManager.Connections.Count;
+
+            // Update connection count in UI
+            if (this.FindName("ConnectionStatusText") is TextBlock statusText)
+            {
+                statusText.Text = $"{connectionsCount} connections";
+            }
+
+            // Update all visuals to show connection count
+            RefreshEntityVisuals();
+        }
+
+
+        private void RefreshEntityVisuals()
+        {
             foreach (var kvp in canvasEntityMap.ToList())
             {
                 var canvas = kvp.Key;
                 var entity = kvp.Value;
 
-                // Update visual representation
-                PlaceEntityOnCanvas(canvas, entity);
+                canvas.Children.Clear();
+                var entityVisual = CreateEntityVisual(entity);
+                canvas.Children.Add(entityVisual);
+                entityVisual.MouseLeftButtonDown += EntityOnCanvas_MouseLeftButtonDown;
+
+                UpdateCanvasAppearance(canvas, entity);
             }
         }
 
         #endregion
-       private void EntityOnCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+
+        #region Canvas-to-Canvas Drag & Drop
+
+        private void EntityOnCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (isDragging) return;
 
@@ -308,9 +396,107 @@ namespace NetworkService.Views
             }
         }
 
+        #endregion
+
+        #region Connection Events
+
+        private void OnConnectionAdded(Connection connection)
+        {
+            // Update line positions
+            connection.UpdateLinePosition();
+
+            // Refresh visuals to show updated connection counts
+            RefreshEntityVisuals();
+        }
+
+        private void OnConnectionRemoved(Connection connection)
+        {
+            // Refresh visuals to show updated connection counts
+            RefreshEntityVisuals();
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        public void RefreshEntityDisplays()
+        {
+            // Refresh all displayed entities with current values
+            foreach (var kvp in canvasEntityMap.ToList())
+            {
+                var canvas = kvp.Key;
+                var entity = kvp.Value;
+
+                // Update visual representation
+                PlaceEntityOnCanvas(canvas, entity);
+            }
+
+            // Update all line positions and colors
+            connectionManager.UpdateAllLinePositions();
+            connectionManager.UpdateAllLineColors();
+        }
+
+        public void UpdateEntityValue(PowerConsumptionEntity entity)
+        {
+            if (entity == null) return;
+
+            // Find canvas containing this entity
+            var canvas = canvasEntityMap.FirstOrDefault(x => x.Value.Id == entity.Id).Key;
+            if (canvas != null)
+            {
+                // Update visual
+                PlaceEntityOnCanvas(canvas, entity);
+
+                // Update connection colors (entity validity might have changed)
+                connectionManager.UpdateAllLineColors();
+            }
+        }
+
+        public string GetNetworkStatistics()
+        {
+            var entitiesCount = canvasEntityMap.Count;
+            var connectionsCount = connectionManager.Connections.Count;
+            var validEntities = canvasEntityMap.Values.Count(e => e.IsValueValid);
+            var invalidEntities = entitiesCount - validEntities;
+
+            return $"Entities: {entitiesCount}, Connections: {connectionsCount}, Valid: {validEntities}, Invalid: {invalidEntities}";
+        }
+
+        /// <summary>
+        /// Toggle connection display (show/hide all lines)
+        /// </summary>
+        public void ToggleConnectionDisplay()
+        {
+            if (lineCanvas != null)
+            {
+                lineCanvas.Visibility = lineCanvas.Visibility == Visibility.Visible
+                    ? Visibility.Hidden
+                    : Visibility.Visible;
+            }
+        }
+
+        #endregion
+
+        #region Cleanup
+
+        /// <summary>
+        /// Clean up resources when view is disposed
+        /// </summary>
+        public void Cleanup()
+        {
+            if (connectionManager != null)
+            {
+                connectionManager.ConnectionAdded -= OnConnectionAdded;
+                connectionManager.ConnectionRemoved -= OnConnectionRemoved;
+                connectionManager.ClearAllConnections();
+            }
+
+            canvasEntityMap?.Clear();
+        }
+
+        #endregion
+ 
     }
-
-
 
     #region Helper Classes
 

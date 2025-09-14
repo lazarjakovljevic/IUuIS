@@ -1,12 +1,13 @@
-﻿using System;
+﻿using NetworkService.Model;
+using NetworkService.MVVM;
+using NetworkService.Services;
+using NetworkService.Views;
+using System;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Windows;
-using NetworkService.MVVM;
-using NetworkService.Model;
-using NetworkService.Services;
 
 namespace NetworkService.ViewModel
 {
@@ -23,6 +24,9 @@ namespace NetworkService.ViewModel
 
         // Shared entities collection for all ViewModels
         public static ObservableCollection<PowerConsumptionEntity> SharedEntities { get; set; }
+
+        // Reference to NetworkDisplayView for connection updates
+        private NetworkDisplayView networkDisplayView;
 
         #endregion
 
@@ -103,7 +107,11 @@ namespace NetworkService.ViewModel
                     CurrentViewModel = new NetworkEntitiesViewModel();
                     break;
                 case "display":
-                    CurrentViewModel = new NetworkDisplayViewModel();
+                    var displayViewModel = new NetworkDisplayViewModel();
+                    CurrentViewModel = displayViewModel;
+
+                    // Store reference to the view for connection updates
+                    // This will be set when the view is actually created
                     break;
                 case "graph":
                     CurrentViewModel = new MeasurementGraphViewModel();
@@ -163,18 +171,6 @@ namespace NetworkService.ViewModel
                                         byte[] data = System.Text.Encoding.ASCII.GetBytes(currentCount.ToString());
                                         stream.Write(data, 0, data.Length);
 
-                                        Console.WriteLine($"Sent object count: {currentCount}");
-                                    }
-                                    else if (incoming.StartsWith("Entitet_") && incoming.Contains(":"))
-                                    {
-                                        // Measurement data received
-                                        Console.WriteLine($"Received measurement: {incoming}");
-
-                                        // Process through measurement service
-                                        measurementService.ProcessTcpMessage(incoming, SharedEntities);
-                                    }
-                                    else
-                                    {
                                         Console.WriteLine($"Unknown message received: {incoming}");
                                         measurementService.LogError($"Unknown TCP message: {incoming}");
                                     }
@@ -220,7 +216,7 @@ namespace NetworkService.ViewModel
             {
                 try
                 {
-                    // 4 SATA KASNIJE OVO JEDINO RADI, AMIN
+                    // Update NetworkEntitiesView if it's currently active
                     if (CurrentViewModel is NetworkEntitiesViewModel entitiesViewModel)
                     {
                         var entities = entitiesViewModel.Entities;
@@ -235,6 +231,15 @@ namespace NetworkService.ViewModel
                             // Also refresh the filtered view
                             entitiesViewModel.FilteredEntities?.Refresh();
                         }
+                    }
+
+                    // Update NetworkDisplayView if it's currently active
+                    if (CurrentViewModel is NetworkDisplayViewModel)
+                    {
+                        // Find the actual NetworkDisplayView instance
+                        // Since we can't directly access the view from ViewModel in pure MVVM,
+                        // we'll use the measurement service to notify about value changes
+                        UpdateNetworkDisplayConnections(entity);
                     }
 
                 }
@@ -257,12 +262,109 @@ namespace NetworkService.ViewModel
 
         #endregion
 
+        #region Network Display Support
+
+        /// <summary>
+        /// Register NetworkDisplayView for connection updates
+        /// This method should be called from NetworkDisplayView constructor
+        /// </summary>
+        public void RegisterNetworkDisplayView(NetworkDisplayView view)
+        {
+            networkDisplayView = view;
+        }
+
+        /// <summary>
+        /// Update connections in NetworkDisplayView when entity value changes
+        /// </summary>
+        private void UpdateNetworkDisplayConnections(PowerConsumptionEntity entity)
+        {
+            if (networkDisplayView != null)
+            {
+                try
+                {
+                    // Update the entity value and refresh connections
+                    networkDisplayView.UpdateEntityValue(entity);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error updating network display connections: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle entity deletion from the shared collection
+        /// This method should be called when entity is deleted from NetworkEntitiesView
+        /// </summary>
+        public static void OnEntityDeleted(PowerConsumptionEntity entity)
+        {
+            if (entity == null) return;
+
+            // The entity will be automatically removed from TreeView via data binding
+            // Connection cleanup will be handled by NetworkDisplayView when it detects the entity removal
+            Console.WriteLine($"Entity {entity.Name} (ID: {entity.Id}) was deleted from shared collection");
+        }
+
+        /// <summary>
+        /// Handle entity addition to the shared collection
+        /// </summary>
+        public static void OnEntityAdded(PowerConsumptionEntity entity)
+        {
+            if (entity == null) return;
+
+            Console.WriteLine($"Entity {entity.Name} (ID: {entity.Id}) was added to shared collection");
+
+            // Entity will automatically appear in TreeView via data binding
+            // No connection management needed here since entity is not on network grid yet
+        }
+
+        #endregion
+
         #region Public Methods
 
+        /// <summary>
+        /// Get current network statistics
+        /// </summary>
+        public string GetNetworkStatistics()
+        {
+            if (networkDisplayView != null)
+            {
+                return networkDisplayView.GetNetworkStatistics();
+            }
+
+            return $"Entities in system: {SharedEntities?.Count ?? 0}";
+        }
+
+        /// <summary>
+        /// Update entity count (called when entities are added/removed)
+        /// </summary>
         public static void UpdateEntityCount()
         {
             // This method can be called when entities are added/removed
             // to notify other components about count changes
+            Console.WriteLine($"Entity count updated: {SharedEntities?.Count ?? 0} entities");
+        }
+
+        #endregion
+
+        #region Cleanup
+
+        /// <summary>
+        /// Cleanup resources when application shuts down
+        /// </summary>
+        public void Cleanup()
+        {
+            if (measurementService != null)
+            {
+                measurementService.MeasurementReceived -= OnMeasurementReceived;
+                measurementService.AlertTriggered -= OnAlertTriggered;
+            }
+
+            if (networkDisplayView != null)
+            {
+                networkDisplayView.Cleanup();
+                networkDisplayView = null;
+            }
         }
 
         #endregion

@@ -64,7 +64,7 @@ namespace NetworkService.ViewModel
                 {
                     var intervalGroup = new EntityGroup("Interval Meters");
                     foreach (var meter in intervalMeters)
-                        intervalGroup.Entities.Add(meter);
+                        intervalGroup.Entities.Add(meter);  // Umesto AddRange
                     GroupedEntities.Add(intervalGroup);
                 }
             }
