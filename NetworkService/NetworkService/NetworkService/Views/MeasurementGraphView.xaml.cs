@@ -97,7 +97,7 @@ namespace NetworkService.Views
                 Foreground = Brushes.Black,
                 RenderTransform = new RotateTransform(-90)
             };
-            Canvas.SetLeft(yLabel, 15);
+            Canvas.SetLeft(yLabel, -15);
             Canvas.SetTop(yLabel, ChartCanvas.Height / 2);
             ChartCanvas.Children.Add(yLabel);
 
@@ -109,7 +109,7 @@ namespace NetworkService.Views
                 Foreground = Brushes.Black
             };
             Canvas.SetLeft(xLabel, ChartCanvas.Width / 2 - 20);
-            Canvas.SetTop(xLabel, ChartCanvas.Height - 20);
+            Canvas.SetTop(xLabel, ChartCanvas.Height - 15);
             ChartCanvas.Children.Add(xLabel);
         }
 
@@ -127,7 +127,6 @@ namespace NetworkService.Views
 
             // Find max value for scaling
             double maxValue = Math.Max(measurements.Max(m => m.Value), 3.0); // At least 3.0 for scale
-            double minValue = 0;
 
             for (int i = 0; i < measurements.Count; i++)
             {
@@ -195,12 +194,11 @@ namespace NetworkService.Views
                 {
                     Text = measurement.Timestamp.ToString("HH:mm:ss"),
                     FontSize = 9,
-                    Foreground = Brushes.Black,
-                    RenderTransform = new RotateTransform(-45) // Rotate for better fit
+                    Foreground = Brushes.Black
                 };
 
-                Canvas.SetLeft(timeLabel, x + barWidth / 2 - 10);
-                Canvas.SetTop(timeLabel, ChartCanvas.Height - 35);
+                Canvas.SetLeft(timeLabel, x + barWidth / 2 - 20);
+                Canvas.SetTop(timeLabel, ChartCanvas.Height - 30);
                 ChartCanvas.Children.Add(timeLabel);
             }
         }
@@ -251,7 +249,7 @@ namespace NetworkService.Views
                         Y2 = y,
                         Stroke = Brushes.LightGray,
                         StrokeThickness = 0.5,
-                        StrokeDashArray = new DoubleCollection { 2, 2 }
+                        StrokeDashArray = new DoubleCollection { 1, 1 }
                     };
                     ChartCanvas.Children.Add(gridLine);
                 }
