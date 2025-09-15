@@ -1,11 +1,12 @@
-﻿using System;
+﻿using NetworkService.Commands;
+using NetworkService.Model;
+using NetworkService.MVVM;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
-using NetworkService.MVVM;
-using NetworkService.Model;
 
 namespace NetworkService.ViewModel
 {
@@ -300,9 +301,9 @@ namespace NetworkService.ViewModel
                     NewEntityType
                 );
 
-                Entities.Add(newEntity);
+                var addCommand = new AddEntityCommand(Entities, newEntity);
+                UndoManager.Instance.ExecuteCommand(addCommand);
 
-                // Clear form
                 NewEntityId = "";
                 NewEntityName = "";
                 NewEntityType = null;
@@ -334,7 +335,10 @@ namespace NetworkService.ViewModel
 
             if (result == MessageBoxResult.Yes)
             {
-                Entities.Remove(SelectedEntity);
+                // Use UndoManager instead of direct remove
+                var deleteCommand = new DeleteEntityCommand(Entities, SelectedEntity);
+                UndoManager.Instance.ExecuteCommand(deleteCommand);
+
                 MessageBox.Show("Entity deleted successfully!", "Success",
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }

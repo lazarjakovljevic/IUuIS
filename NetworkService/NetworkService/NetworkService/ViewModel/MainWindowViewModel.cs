@@ -1,4 +1,5 @@
-﻿using NetworkService.Model;
+﻿using NetworkService.Commands;
+using NetworkService.Model;
 using NetworkService.MVVM;
 using NetworkService.Services;
 using NetworkService.Views;
@@ -54,6 +55,13 @@ namespace NetworkService.ViewModel
             InitializeServices();
             CreateListener(); // TCP connection setup
 
+            // Subscribe to UndoManager events
+            UndoManager.UndoStackChanged += () =>
+            {
+                UndoCommand.RaiseCanExecuteChanged();
+                OnPropertyChanged(nameof(CanUndoActions)); 
+            };
+
             // Set initial view to home
             CurrentViewModel = new HomeViewModel();
         }
@@ -95,8 +103,7 @@ namespace NetworkService.ViewModel
         private void InitializeCommands()
         {
             NavCommand = new MyICommand<string>(OnNav);
-            HomeCommand = new MyICommand(OnHome);
-            UndoCommand = new MyICommand(OnUndo);
+            UndoCommand = new MyICommand(OnUndo, CanUndo);
         }
 
         private void OnNav(string destination)
@@ -129,11 +136,6 @@ namespace NetworkService.ViewModel
             CurrentViewModel = new HomeViewModel();
         }
 
-        private void OnUndo()
-        {
-            MessageBox.Show("Undo functionality will be implemented soon!", "Coming Soon",
-                MessageBoxButton.OK, MessageBoxImage.Information);
-        }
 
         #endregion
 
@@ -276,25 +278,17 @@ namespace NetworkService.ViewModel
 
         #region Network Display Support
 
-        /// <summary>
-        /// Register NetworkDisplayView for connection updates
-        /// This method should be called from NetworkDisplayView constructor
-        /// </summary>
         public void RegisterNetworkDisplayView(NetworkDisplayView view)
         {
             networkDisplayView = view;
         }
 
-        /// <summary>
-        /// Update connections in NetworkDisplayView when entity value changes
-        /// </summary>
         private void UpdateNetworkDisplayConnections(PowerConsumptionEntity entity)
         {
             if (networkDisplayView != null)
             {
                 try
                 {
-                    // Update the entity value and refresh connections
                     networkDisplayView.UpdateEntityValue(entity);
                 }
                 catch (Exception ex)
@@ -304,16 +298,10 @@ namespace NetworkService.ViewModel
             }
         }
 
-        /// <summary>
-        /// Handle entity deletion from the shared collection
-        /// This method should be called when entity is deleted from NetworkEntitiesView
-        /// </summary>
         public static void OnEntityDeleted(PowerConsumptionEntity entity)
         {
             if (entity == null) return;
 
-            // The entity will be automatically removed from TreeView via data binding
-            // Connection cleanup will be handled by NetworkDisplayView when it detects the entity removal
             Console.WriteLine($"Entity {entity.Name} (ID: {entity.Id}) was deleted from shared collection");
         }
 
@@ -380,6 +368,36 @@ namespace NetworkService.ViewModel
         }
 
         #endregion
+        #region Undo Functionality
+
+        private UndoManager undoManager;
+
+        public UndoManager UndoManager => undoManager ?? (undoManager = UndoManager.Instance);
+
+        public bool CanUndoActions => UndoManager.CanUndo;
+
+        private void OnUndo()
+        {
+            if (!UndoManager.CanUndo)
+            {
+                Console.WriteLine("No actions to undo");
+                return;
+            }
+
+            bool success = UndoManager.Undo();
+            if (!success)
+            {
+                Console.WriteLine("Undo failed");
+            }
+        }
+
+        private bool CanUndo()
+        {
+            return true; 
+        }
+
+        #endregion
+
     }
 
 }

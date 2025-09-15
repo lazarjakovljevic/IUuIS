@@ -54,15 +54,37 @@
 
                 <!-- Undo Button -->
                 <Button Grid.Column="2" 
-                        Name="UndoButton"
-                        Background="Transparent" 
-                        BorderThickness="0"
-                        Command="{Binding UndoCommand}"
-                        Cursor="Hand"
-                        ToolTip="Undo">
+        Name="UndoButton"
+        Background="#2E3440" 
+        BorderThickness="0"
+        Command="{Binding UndoCommand}"
+        Cursor="Hand"
+        ToolTip="Undo">
                     <StackPanel>
-                        <TextBlock Text="↶" FontSize="24" HorizontalAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="Undo" FontSize="10" HorizontalAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="↶" FontSize="24" HorizontalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CanUndoActions}" Value="False">
+                                            <Setter Property="Foreground" Value="#888888"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="Undo" FontSize="10" HorizontalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CanUndoActions}" Value="False">
+                                            <Setter Property="Foreground" Value="#888888"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </StackPanel>
                 </Button>
             </Grid>

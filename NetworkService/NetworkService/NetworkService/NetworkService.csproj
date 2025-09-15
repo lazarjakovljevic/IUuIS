@@ -55,6 +55,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands\AddEntityCommand.cs" />
+    <Compile Include="Commands\DeleteEntityCommand.cs" />
     <Compile Include="Commands\IUndoableCommand.cs" />
     <Compile Include="Commands\UndoManager.cs" />
     <Compile Include="Model\Connection.cs" />
