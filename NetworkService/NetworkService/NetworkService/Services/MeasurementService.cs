@@ -1,7 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using NetworkService.Model;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using NetworkService.Model;
+using System.IO;
 using System.Linq;
 
 namespace NetworkService.Services
@@ -141,7 +142,7 @@ namespace NetworkService.Services
                 var status = isValid ? "NORMAL" : "ALERT";
                 var logEntry = $"[{timestamp}] Entity_ID: {entityId}, Value: {value:F2} kWh, Status: {status}";
 
-                lock (lockObject)
+                lock (lockObject) 
                 {
                     File.AppendAllText(LOG_FILE_PATH, logEntry + Environment.NewLine);
                 }
@@ -202,6 +203,46 @@ namespace NetworkService.Services
             }
         }
 
+        public List<Measurement> GetLastMeasurementsForEntity(int entityId, int count = 5)
+        {
+            var measurements = new List<Measurement>();
+
+            try
+            {
+                if (!File.Exists(LOG_FILE_PATH))
+                    return measurements;
+
+                string[] allLines;
+                lock (lockObject)
+                {
+                    allLines = File.ReadAllLines(LOG_FILE_PATH);
+                }
+
+                // Filter lines for specific entity and parse them
+                var entityLines = allLines
+                    .Where(line => line.Contains($"Entity_ID: {entityId}") && !line.Contains("ERROR"))
+                    .ToList();
+
+                // Take last 'count' measurements
+                var lastLines = entityLines.Skip(Math.Max(0, entityLines.Count - count)).ToList();
+
+                foreach (var line in lastLines)
+                {
+                    var measurement = ParseMeasurementLine(line);
+                    if (measurement != null)
+                    {
+                        measurements.Add(measurement);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"Error reading measurements for entity {entityId}: {ex.Message}");
+            }
+
+            return measurements;
+        }
+
         #endregion
 
         #region Private Methods
@@ -220,6 +261,34 @@ namespace NetworkService.Services
             {
                 Console.WriteLine($"Error creating log file: {ex.Message}");
             }
+        }
+
+        private Measurement ParseMeasurementLine(string line)
+        {
+            try
+            {
+                // Format: [2025-09-15 14:23:45] Entity_ID: 1, Value: 1.55 kWh, Status: NORMAL
+                var parts = line.Split(new[] { "] Entity_ID: ", ", Value: ", " kWh, Status: " }, StringSplitOptions.None);
+
+                if (parts.Length >= 4)
+                {
+                    var timestampStr = parts[0].Substring(1); // Remove '['
+                    var entityId = int.Parse(parts[1]);
+                    var value = double.Parse(parts[2]);
+                    var status = parts[3];
+
+                    var timestamp = DateTime.ParseExact(timestampStr, "yyyy-MM-dd HH:mm:ss", null);
+                    var isValid = status == "NORMAL";
+
+                    return new Measurement(timestamp, entityId, value, isValid, status);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"Error parsing measurement line: {line} - {ex.Message}");
+            }
+
+            return null;
         }
 
         #endregion

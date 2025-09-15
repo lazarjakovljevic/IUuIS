@@ -265,12 +265,11 @@ namespace NetworkService.ViewModel
 
         private void OnAlertTriggered(string alertMessage)
         {
-            // Show alert on UI thread
-            Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                MessageBox.Show(alertMessage, "Measurement Alert",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-            }));
+            // Log alert instead of showing blocking MessageBox
+            Console.WriteLine($"ALERT: {alertMessage}");
+
+            // You can add a non-blocking notification here later
+            // For now, just log to console to not block UI thread
         }
 
         #endregion
@@ -383,11 +382,4 @@ namespace NetworkService.ViewModel
         #endregion
     }
 
-    #region Other ViewModels
-    public class MeasurementGraphViewModel : BindableBase
-    {
-        // Bar chart showing last 5 measurements
-    }
-
-    #endregion
 }

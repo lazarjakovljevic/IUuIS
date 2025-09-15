@@ -57,6 +57,7 @@
     </ApplicationDefinition>
     <Compile Include="Model\Connection.cs" />
     <Compile Include="Model\EntityTypes.cs" />
+    <Compile Include="Model\Measurements.cs" />
     <Compile Include="Model\PowerConsumption.cs" />
     <Compile Include="MVVM\BindableBase.cs" />
     <Compile Include="MVVM\MyICommand.cs" />
@@ -65,10 +66,14 @@
     <Compile Include="Services\MeasurementService.cs" />
     <Compile Include="ViewModel\HomeViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
+    <Compile Include="ViewModel\MeasurementGraphViewModel.cs" />
     <Compile Include="ViewModel\NetworkDisplayViewModel.cs" />
     <Compile Include="ViewModel\NetworkEntitiesViewModel.cs" />
     <Compile Include="Views\HomeView.xaml.cs">
       <DependentUpon>HomeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MeasurementGraphView.xaml.cs">
+      <DependentUpon>MeasurementGraphView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\NetworkDisplayView.xaml.cs">
       <DependentUpon>NetworkDisplayView.xaml</DependentUpon>
@@ -89,6 +94,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\HomeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MeasurementGraphView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
