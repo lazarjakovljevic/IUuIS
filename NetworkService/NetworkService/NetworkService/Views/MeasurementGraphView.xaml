@@ -52,10 +52,10 @@
 
                     <!-- Canvas for drawing chart -->
                     <Canvas Name="ChartCanvas" 
-                           Width="450" 
-                           Height="350" 
+                           Width="475" 
+                           Height="400" 
                            Background="White"
-                           Margin="25,20,25,20" 
+                           Margin="25,10,25,10" 
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>
                 </StackPanel>

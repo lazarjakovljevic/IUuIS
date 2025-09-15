@@ -254,6 +254,47 @@ namespace NetworkService.Views
                     ChartCanvas.Children.Add(gridLine);
                 }
             }
+
+            DrawValidRangeMarkers(maxValue, chartHeight);
+        }
+
+        private void DrawValidRangeMarkers(double maxValue, double chartHeight)
+        {
+            // Mark 0.34 and 2.73 on Y axis
+            double[] validValues = { 0.34, 2.73 };
+
+            foreach (double value in validValues)
+            {
+                if (value <= maxValue)
+                {
+                    double y = ChartCanvas.Height - 40 - (value / maxValue * chartHeight);
+
+                    // Colored scale line
+                    var validLine = new Line
+                    {
+                        X1 = 35,
+                        Y1 = y,
+                        X2 = 45,
+                        Y2 = y,
+                        Stroke = Brushes.Green,
+                        StrokeThickness = 3
+                    };
+                    ChartCanvas.Children.Add(validLine);
+
+                    // Colored label
+                    var validLabel = new TextBlock
+                    {
+                        Text = value.ToString("F2"),
+                        FontSize = 10,
+                        Foreground = Brushes.Green,
+                        FontWeight = FontWeights.Bold
+                    };
+
+                    Canvas.SetLeft(validLabel, 10);
+                    Canvas.SetTop(validLabel, y - 7);
+                    ChartCanvas.Children.Add(validLabel);
+                }
+            }
         }
     }
 }
