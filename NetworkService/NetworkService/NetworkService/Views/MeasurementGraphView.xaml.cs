@@ -16,12 +16,13 @@ namespace NetworkService.Views
         public MeasurementGraphView()
         {
             InitializeComponent();
-            viewModel = new MeasurementGraphViewModel();
+
+            viewModel = MeasurementGraphViewModel.Instance;
             this.DataContext = viewModel;
 
-            // Subscribe to measurements changes
             viewModel.PropertyChanged += ViewModel_PropertyChanged;
         }
+
 
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {

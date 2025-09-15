@@ -122,7 +122,7 @@ namespace NetworkService.ViewModel
                     CurrentViewModel = NetworkDisplayViewModel.Instance;
                     break;
                 case "graph":
-                    CurrentViewModel = new MeasurementGraphViewModel();
+                    CurrentViewModel = MeasurementGraphViewModel.Instance;
                     break;
                 case "home":
                 default:

@@ -59,6 +59,7 @@
     <Compile Include="Commands\DeleteEntityCommand.cs" />
     <Compile Include="Commands\IUndoableCommand.cs" />
     <Compile Include="Commands\MoveEntityCommand.cs" />
+    <Compile Include="Commands\SelectEntityCommand.cs" />
     <Compile Include="Commands\UndoManager.cs" />
     <Compile Include="Model\Connection.cs" />
     <Compile Include="Model\EntityTypes.cs" />
