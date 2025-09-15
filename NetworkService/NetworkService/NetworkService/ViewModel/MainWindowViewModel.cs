@@ -41,7 +41,7 @@ namespace NetworkService.ViewModel
 
         #region TCP Communication
 
-        private int count = 3; // Initial number of objects in system
+        private int count = 6; // Initial number of objects in system
         private MeasurementService measurementService;
 
         #endregion
@@ -50,9 +50,9 @@ namespace NetworkService.ViewModel
 
         public MainWindowViewModel()
         {
+            InitializeServices();
             InitializeSharedData();
             InitializeCommands();
-            InitializeServices();
             CreateListener(); // TCP connection setup
 
             // Subscribe to UndoManager events
@@ -76,15 +76,21 @@ namespace NetworkService.ViewModel
             {
                 SharedEntities = new ObservableCollection<PowerConsumptionEntity>();
                 LoadInitialEntities();
+
+                // Load last values from measurements file
+                measurementService.LoadLastMeasurementsFromFile(SharedEntities);
             }
         }
 
         private void LoadInitialEntities()
         {
-            // Load some initial entities
+            // Load initial entities
             SharedEntities.Add(new PowerConsumptionEntity(0, "Main Building Meter", EntityType.SmartMeter) { CurrentValue = 1.2 }); // NORMAL
             SharedEntities.Add(new PowerConsumptionEntity(1, "Workshop Meter", EntityType.IntervalMeter) { CurrentValue = 2.1 }); // NORMAL
             SharedEntities.Add(new PowerConsumptionEntity(2, "Office Complex", EntityType.SmartMeter) { CurrentValue = 0.2 }); // ALERT
+            SharedEntities.Add(new PowerConsumptionEntity(3, "Factory Line A", EntityType.IntervalMeter) { CurrentValue = 1.8 }); // NORMAL
+            SharedEntities.Add(new PowerConsumptionEntity(4, "Warehouse East", EntityType.SmartMeter) { CurrentValue = 3.1 }); // ALERT  
+            SharedEntities.Add(new PowerConsumptionEntity(5, "Server Room", EntityType.IntervalMeter) { CurrentValue = 0.9 }); // NORMAL
         }
 
         private void InitializeServices()
@@ -102,6 +108,7 @@ namespace NetworkService.ViewModel
 
         private void InitializeCommands()
         {
+            HomeCommand = new MyICommand(OnHome);
             NavCommand = new MyICommand<string>(OnNav);
             UndoCommand = new MyICommand(OnUndo, CanUndo);
         }
@@ -116,7 +123,7 @@ namespace NetworkService.ViewModel
             switch (destination?.ToLower())
             {
                 case "entities":
-                    CurrentViewModel = new NetworkEntitiesViewModel();
+                    CurrentViewModel = NetworkEntitiesViewModel.Instance; 
                     break;
                 case "display":
                     CurrentViewModel = NetworkDisplayViewModel.Instance;
@@ -322,9 +329,6 @@ namespace NetworkService.ViewModel
 
         #region Public Methods
 
-        /// <summary>
-        /// Get current network statistics
-        /// </summary>
         public string GetNetworkStatistics()
         {
             if (networkDisplayView != null)
@@ -349,9 +353,6 @@ namespace NetworkService.ViewModel
 
         #region Cleanup
 
-        /// <summary>
-        /// Cleanup resources when application shuts down
-        /// </summary>
         public void Cleanup()
         {
             if (measurementService != null)
@@ -368,6 +369,7 @@ namespace NetworkService.ViewModel
         }
 
         #endregion
+
         #region Undo Functionality
 
         private UndoManager undoManager;

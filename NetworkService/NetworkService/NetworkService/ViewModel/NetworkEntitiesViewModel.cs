@@ -12,6 +12,21 @@ namespace NetworkService.ViewModel
 {
     public class NetworkEntitiesViewModel : BindableBase
     {
+        #region Singleton Pattern
+
+        private static NetworkEntitiesViewModel instance;
+        public static NetworkEntitiesViewModel Instance
+        {
+            get
+            {
+                if (instance == null)
+                    instance = new NetworkEntitiesViewModel();
+                return instance;
+            }
+        }
+
+        #endregion
+
         #region Properties
 
         // Collections
@@ -162,22 +177,20 @@ namespace NetworkService.ViewModel
 
         #endregion
 
-        #region Commands
-
-        public MyICommand AddEntityCommand { get; private set; }
-        public MyICommand DeleteEntityCommand { get; private set; }
-        public MyICommand ClearFiltersCommand { get; private set; }
-
-        #endregion
-
         #region Constructor
-
-        public NetworkEntitiesViewModel()
+        private NetworkEntitiesViewModel()
         {
             InitializeCollections();
             InitializeCommands();
             SetupFiltering();
         }
+        #endregion
+
+        #region Commands
+
+        public MyICommand AddEntityCommand { get; private set; }
+        public MyICommand DeleteEntityCommand { get; private set; }
+        public MyICommand ClearFiltersCommand { get; private set; }
 
         #endregion
 

@@ -134,6 +134,46 @@ namespace NetworkService.Services
             }
         }
 
+        /// <summary>
+        /// Loads last measurements from file and updates entity values
+        /// </summary>
+        public void LoadLastMeasurementsFromFile(ObservableCollection<PowerConsumptionEntity> entities)
+        {
+            try
+            {
+                if (!File.Exists(LOG_FILE_PATH))
+                {
+                    Console.WriteLine("No measurements file found - using default values");
+                    return;
+                }
+
+                Console.WriteLine("Loading last measurements from file...");
+
+                foreach (var entity in entities)
+                {
+                    var lastMeasurements = GetLastMeasurementsForEntity(entity.Id, 1);
+
+                    if (lastMeasurements.Any())
+                    {
+                        var lastMeasurement = lastMeasurements.Last();
+
+                        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+                        {
+                            entity.CurrentValue = lastMeasurement.Value;
+                        });
+
+                        Console.WriteLine($"Loaded Entity {entity.Id}: {lastMeasurement.Value:F2} kWh from {lastMeasurement.Timestamp:HH:mm:ss}");
+                    }
+                }
+
+                Console.WriteLine("Finished loading measurements from file");
+            }
+            catch (Exception ex)
+            {
+                LogError($"Error loading measurements from file: {ex.Message}");
+            }
+        }
+
         public void LogMeasurement(int entityId, double value, bool isValid)
         {
             try
