@@ -385,22 +385,20 @@ namespace NetworkService.Views
             connectionManager.ClearAllConnections();
 
             var entitiesCount = canvasEntityMap.Count;
+            Console.WriteLine($"Creating connections for {entitiesCount} entities");
 
             // Create new connections
             connectionManager.CreateAutomaticConnections();
 
             var connectionsCount = connectionManager.Connections.Count;
+            Console.WriteLine($"Created {connectionsCount} connections");
 
             // Update connection count in UI
-            if (this.FindName("ConnectionStatusText") is TextBlock statusText)
-            {
-                statusText.Text = $"{connectionsCount} connections";
-            }
+            bool linesVisible = lineCanvas?.Visibility == Visibility.Visible;
+            UpdateConnectionCountDisplay(linesVisible);
 
             // Update all visuals to show connection count
             RefreshEntityVisuals();
-
-            UpdateButtonStates();
         }
 
 
@@ -528,9 +526,11 @@ namespace NetworkService.Views
         {
             if (lineCanvas != null)
             {
-                lineCanvas.Visibility = lineCanvas.Visibility == Visibility.Visible
-                    ? Visibility.Hidden
-                    : Visibility.Visible;
+                bool willBeVisible = lineCanvas.Visibility == Visibility.Hidden;
+                lineCanvas.Visibility = willBeVisible ? Visibility.Visible : Visibility.Hidden;
+
+                // Update connection count display
+                UpdateConnectionCountDisplay(willBeVisible);
             }
         }
 
@@ -645,6 +645,23 @@ namespace NetworkService.Views
             isUndoOperation = true;
             RemoveEntityFromCanvas(canvas, returnToTree);
             isUndoOperation = false;
+        }
+
+        private void UpdateConnectionCountDisplay(bool showConnections)
+        {
+            if (this.FindName("ConnectionStatusText") is TextBlock statusText)
+            {
+                int actualConnections = connectionManager.Connections.Count;
+
+                if (showConnections)
+                {
+                    statusText.Text = $"{actualConnections} connections";
+                }
+                else
+                {
+                    statusText.Text = "0 connections";
+                }
+            }
         }
 
         #endregion
