@@ -44,6 +44,8 @@ namespace NetworkService.ViewModel
             set { SetProperty(ref filteredEntities, value); }
         }
 
+
+
         // Available types for ComboBox
         public ObservableCollection<EntityType> AvailableTypes { get; set; }
         public ObservableCollection<EntityType> FilterTypes { get; set; }
@@ -138,7 +140,7 @@ namespace NetworkService.ViewModel
             set
             {
                 SetProperty(ref filterIdValue, value);
-                ApplyFilters();
+                ApplyFilters(); 
             }
         }
 
@@ -148,8 +150,16 @@ namespace NetworkService.ViewModel
             get { return isLessThanSelected; }
             set
             {
-                SetProperty(ref isLessThanSelected, value);
-                if (value) ApplyFilters();
+                if (SetProperty(ref isLessThanSelected, value) && value)
+                {
+                    // Set others to false
+                    isGreaterThanSelected = false;
+                    isEqualSelected = false;
+                    OnPropertyChanged(nameof(IsGreaterThanSelected));
+                    OnPropertyChanged(nameof(IsEqualSelected));
+
+                    ApplyFilters();
+                }
             }
         }
 
@@ -159,8 +169,16 @@ namespace NetworkService.ViewModel
             get { return isGreaterThanSelected; }
             set
             {
-                SetProperty(ref isGreaterThanSelected, value);
-                if (value) ApplyFilters();
+                if (SetProperty(ref isGreaterThanSelected, value) && value)
+                {
+                    // Set others to false
+                    isLessThanSelected = false;
+                    isEqualSelected = false;
+                    OnPropertyChanged(nameof(IsLessThanSelected));
+                    OnPropertyChanged(nameof(IsEqualSelected));
+
+                    ApplyFilters();
+                }
             }
         }
 
@@ -170,8 +188,16 @@ namespace NetworkService.ViewModel
             get { return isEqualSelected; }
             set
             {
-                SetProperty(ref isEqualSelected, value);
-                if (value) ApplyFilters();
+                if (SetProperty(ref isEqualSelected, value) && value)
+                {
+                    // Set others to false
+                    isLessThanSelected = false;
+                    isGreaterThanSelected = false;
+                    OnPropertyChanged(nameof(IsLessThanSelected));
+                    OnPropertyChanged(nameof(IsGreaterThanSelected));
+
+                    ApplyFilters();
+                }
             }
         }
 
@@ -395,6 +421,8 @@ namespace NetworkService.ViewModel
 
         private void ApplyFilters()
         {
+            Console.WriteLine($"Applying filters: Less={IsLessThanSelected}, Greater={IsGreaterThanSelected}, Equal={IsEqualSelected}, Value={FilterIdValue}");
+
             if (FilteredEntities != null)
             {
                 FilteredEntities.Refresh();
