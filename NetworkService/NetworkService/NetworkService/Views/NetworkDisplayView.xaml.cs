@@ -1,4 +1,5 @@
-﻿using NetworkService.Model;
+﻿using NetworkService.Commands;
+using NetworkService.Model;
 using NetworkService.MVVM;
 using NetworkService.Services;
 using NetworkService.ViewModel;
@@ -15,6 +16,12 @@ namespace NetworkService.Views
 {
     public partial class NetworkDisplayView : UserControl
     {
+        #region Singleton Pattern
+
+        public static NetworkDisplayView Instance { get; private set; }
+
+        #endregion
+
         #region Fields
 
         private PowerConsumptionEntity draggedEntity;
@@ -22,6 +29,7 @@ namespace NetworkService.Views
         private Dictionary<Canvas, PowerConsumptionEntity> canvasEntityMap;
         private ConnectionManager connectionManager;
         private Canvas lineCanvas;
+        private bool isUndoOperation = false;
 
         #endregion
 
@@ -31,6 +39,9 @@ namespace NetworkService.Views
         {
             InitializeComponent();
             InitializeComponents();
+
+            // Set singleton instance
+            Instance = this;
 
             // Use singleton ViewModel to preserve state
             this.DataContext = NetworkDisplayViewModel.Instance;
@@ -220,6 +231,9 @@ namespace NetworkService.Views
 
         private void PlaceEntityOnCanvas(Canvas canvas, PowerConsumptionEntity entity)
         {
+            // Find previous canvas if entity was already placed
+            var previousCanvas = canvasEntityMap.FirstOrDefault(x => x.Value?.Id == entity.Id).Key;
+
             // Clear canvas
             canvas.Children.Clear();
 
@@ -243,11 +257,15 @@ namespace NetworkService.Views
                 viewModel?.RemoveEntityFromTree(entity);
             }
 
-            //Console.WriteLine($"Placed entity {entity.Name} on canvas {canvas.Name}");
+            // Create move command for undo (only if this wasn't called from undo)
+            if (!isUndoOperation)
+            {
+                var moveCommand = new MoveEntityCommand(entity, previousCanvas, canvas);
+                UndoManager.Instance.ExecuteCommand(moveCommand);
+            }
 
-            UpdateButtonStates();
+            Console.WriteLine($"Placed entity {entity.Name} on canvas {canvas.Name}");
         }
-
         private void RemoveEntityFromCanvas(Canvas canvas, bool returnToTree = true)
         {
             if (canvasEntityMap.ContainsKey(canvas))
@@ -269,14 +287,19 @@ namespace NetworkService.Views
                 {
                     var viewModel = this.DataContext as NetworkService.ViewModel.NetworkDisplayViewModel;
                     viewModel?.AddEntityToTree(entity);
+
+                    // Create remove command for undo (only if this wasn't called from undo and entity goes to TreeView)
+                    if (!isUndoOperation)
+                    {
+                        var removeCommand = new MoveEntityCommand(entity, canvas, null); // null = TreeView
+                        UndoManager.Instance.ExecuteCommand(removeCommand);
+                    }
                 }
 
                 // Update remaining connections
                 CreateAutomaticConnections();
 
-                //Console.WriteLine($"Removed entity {entity.Name} from canvas {canvas.Name}");
-
-                UpdateButtonStates();
+                Console.WriteLine($"Removed entity {entity.Name} from canvas {canvas.Name}");
             }
         }
 
@@ -609,8 +632,22 @@ namespace NetworkService.Views
             UpdateButtonStates();
         }
 
-        
+        #region Undo Support
+        public void PlaceEntityOnCanvasUndo(Canvas canvas, PowerConsumptionEntity entity)
+        {
+            isUndoOperation = true;
+            PlaceEntityOnCanvas(canvas, entity);
+            CreateAutomaticConnections(); // Restore connections
+            isUndoOperation = false;
+        }
+        public void RemoveEntityFromCanvasUndo(Canvas canvas, bool returnToTree)
+        {
+            isUndoOperation = true;
+            RemoveEntityFromCanvas(canvas, returnToTree);
+            isUndoOperation = false;
+        }
 
+        #endregion
     }
 
     #region Helper Classes
