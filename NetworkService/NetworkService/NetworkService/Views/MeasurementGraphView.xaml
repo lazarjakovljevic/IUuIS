@@ -28,13 +28,38 @@
                               FontSize="14" 
                               FontWeight="SemiBold" 
                               Margin="0,0,0,10"/>
-                    <ComboBox Name="EntityComboBox"
-                             ItemsSource="{Binding AvailableEntities}"
-                             SelectedItem="{Binding SelectedEntity}"
-                             DisplayMemberPath="Name"
-                             Height="30"
-                             Width="200"
-                             HorizontalAlignment="Left"/>
+                    <Grid Width="200" HorizontalAlignment="Left">
+                        <ComboBox Name="EntityComboBox"
+                                  ItemsSource="{Binding AvailableEntities}"
+                                  SelectedItem="{Binding SelectedEntity}"
+                                  DisplayMemberPath="Name"
+                                  Height="30">
+                            <ComboBox.Style>
+                                <Style TargetType="ComboBox">
+                                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                    <Setter Property="Padding" Value="5,0,5,0"/>
+                                </Style>
+                            </ComboBox.Style>
+                        </ComboBox>
+
+                        <TextBlock Text="Select an entity..." 
+                                   Foreground="Gray" 
+                                   VerticalAlignment="Center" 
+                                   HorizontalAlignment="Left"
+                                   IsHitTestVisible="False"
+                                   Margin="8,0,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedEntity}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
                 </StackPanel>
             </Border>
 

@@ -21,12 +21,14 @@ namespace NetworkService.Views
             this.DataContext = viewModel;
 
             viewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+            DrawChart();
         }
 
 
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(viewModel.Measurements))
+            if (e.PropertyName == nameof(viewModel.Measurements) || e.PropertyName == nameof(viewModel.SelectedEntity))
             {
                 DrawChart();
             }
