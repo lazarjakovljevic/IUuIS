@@ -4,9 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             Width="580" Height="280"
-             MinWidth="400" MinHeight="200"
-             d:DesignHeight="280" d:DesignWidth="580">
+             Width="565" Height="280"
+             d:DesignHeight="280" d:DesignWidth="560">
 
     <!-- #region Keyboard Resources -->
     <UserControl.Resources>
@@ -79,9 +78,10 @@
     <!-- #region Main Keyboard Layout -->
     <Border Background="#FF1E1E1E" 
             BorderBrush="#FF404040" 
-            BorderThickness="2" 
-            CornerRadius="8"
-            Width="580" Height="280">
+            BorderThickness="0" 
+            CornerRadius="0"
+            Width="565" Height="280"
+            Margin="0,0,15,0">
         <Grid Margin="8">
             <Grid.RowDefinitions>
                 <!-- Header with close button -->
@@ -99,7 +99,7 @@
             </Grid.RowDefinitions>
 
             <!-- #region Header Row -->
-            <Grid Grid.Row="0" Margin="0,0,0,8">
+            <Grid Grid.Row="0" Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>

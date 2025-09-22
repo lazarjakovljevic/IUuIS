@@ -102,17 +102,23 @@ namespace NetworkService.Controls
         }
 
         /// <summary>
-        /// Handle enter key click
+        /// Handle enter key click - close keyboard
         /// </summary>
         private void EnterKey_Click(object sender, RoutedEventArgs e)
         {
-            // Trigger key pressed event for Enter
-            OnKeyPressed(new VirtualKeyEventArgs { Key = "Enter", Action = VirtualKeyAction.Enter });
-
-            // Also send newline to target if it's multiline
-            if (TargetTextBox != null && TargetTextBox.AcceptsReturn)
+            try
             {
-                SendKeyToTarget(Environment.NewLine);
+                // Fire key pressed event for Enter
+                OnKeyPressed(new VirtualKeyEventArgs { Key = "Enter", Action = VirtualKeyAction.Enter });
+
+                // Close keyboard after Enter (mobile behavior)
+                CloseRequested?.Invoke(this, EventArgs.Empty);
+
+                Console.WriteLine("Enter pressed - keyboard closing");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error handling Enter key: {ex.Message}");
             }
         }
 

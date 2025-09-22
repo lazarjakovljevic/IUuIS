@@ -16,6 +16,7 @@
             <RowDefinition Height="80"/>
             <!-- Main content area -->
             <RowDefinition Height="*"/>
+            
             <!-- Bottom navigation bar -->
             <RowDefinition Height="70"/>
         </Grid.RowDefinitions>

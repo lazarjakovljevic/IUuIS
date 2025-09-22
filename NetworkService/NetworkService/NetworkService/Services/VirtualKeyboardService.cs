@@ -317,7 +317,7 @@ namespace NetworkService.Services
         }
 
         /// <summary>
-        /// Position keyboard CORRECTLY above navigation bar
+        /// Position keyboard at bottom of content area (Row 1)
         /// </summary>
         private void PositionKeyboard()
         {
@@ -325,22 +325,26 @@ namespace NetworkService.Services
 
             try
             {
-                Console.WriteLine("🔧 Positioning keyboard ABOVE navigation bar (FIXED)");
+                Console.WriteLine("Positioning keyboard at bottom of content area");
 
-                // CORRECT POSITION: Bottom aligned with proper margin for navigation
+                // CRITICAL: Set to Row 1 (main content area) - NOT Row 0
+                Grid.SetRow(CurrentKeyboard, 1);
+
+                // Position at absolute bottom of Row 1
                 CurrentKeyboard.VerticalAlignment = VerticalAlignment.Bottom;
                 CurrentKeyboard.HorizontalAlignment = HorizontalAlignment.Stretch;
-                CurrentKeyboard.Margin = new Thickness(10, 0, 10, 80); // 70px nav + 10px gap
+                CurrentKeyboard.Margin = new Thickness(0,0,5,0);
 
-                Console.WriteLine($"✅ Keyboard positioned ABOVE navigation");
-                Console.WriteLine($"✅ Keyboard margin: {CurrentKeyboard.Margin}");
+                // Ensure high Z-index so it appears above content
+                Panel.SetZIndex(CurrentKeyboard, 1000);
+
+                Console.WriteLine("Keyboard positioned in Grid Row 1 at bottom");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error positioning keyboard: {ex.Message}");
+                Console.WriteLine($"Error positioning keyboard: {ex.Message}");
             }
         }
-
         /// <summary>
         /// Show keyboard FIXED - always reset opacity
         /// </summary>
@@ -371,7 +375,7 @@ namespace NetworkService.Services
         }
 
         /// <summary>
-        /// Hide keyboard with slide-down animation
+        /// Hide keyboard - FIXED version without broken animations
         /// </summary>
         private void HideKeyboardWithAnimation(Action onCompleted = null)
         {
@@ -379,32 +383,19 @@ namespace NetworkService.Services
 
             try
             {
-                // Create animations
-                var fadeOut = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(250))
-                {
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
-                };
+                Console.WriteLine("🔧 HIDING keyboard - simple version");
 
-                var slideDown = new DoubleAnimation(0, 30, TimeSpan.FromMilliseconds(250))
-                {
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
-                };
+                // SIMPLE HIDE WITHOUT BROKEN ANIMATIONS
+                CurrentKeyboard.Visibility = Visibility.Collapsed;
 
-                // Handle animation completion
-                fadeOut.Completed += (s, e) => onCompleted?.Invoke();
+                // Execute callback immediately
+                onCompleted?.Invoke();
 
-                // Apply animations
-                CurrentKeyboard.BeginAnimation(UIElement.OpacityProperty, fadeOut);
-
-                if (CurrentKeyboard.RenderTransform is TranslateTransform transform)
-                {
-                    transform.BeginAnimation(TranslateTransform.YProperty, slideDown);
-                }
+                Console.WriteLine("✅ Keyboard hidden successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error animating keyboard hide: {ex.Message}");
-                // Fallback to immediate completion
+                Console.WriteLine($"❌ Error hiding keyboard: {ex.Message}");
                 onCompleted?.Invoke();
             }
         }

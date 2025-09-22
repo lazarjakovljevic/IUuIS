@@ -103,17 +103,12 @@ namespace NetworkService
                 if (e.IsVisible)
                 {
                     Console.WriteLine("MainWindow: Virtual keyboard is now visible");
-
-                    // Optional: Adjust main window layout when keyboard appears
-                    // For example, reduce content area height
-                    AdjustLayoutForKeyboard(true);
+                    // REMOVE THIS LINE: AdjustLayoutForKeyboard(true);
                 }
                 else
                 {
                     Console.WriteLine("MainWindow: Virtual keyboard is now hidden");
-
-                    // Restore normal layout
-                    AdjustLayoutForKeyboard(false);
+                    // REMOVE THIS LINE: AdjustLayoutForKeyboard(false);
                 }
             }
             catch (Exception ex)
@@ -127,39 +122,9 @@ namespace NetworkService
         /// </summary>
         private void AdjustLayoutForKeyboard(bool keyboardVisible)
         {
-            try
-            {
-                if (Content is Grid mainGrid)
-                {
-                    // Find the main content row (middle row in 3-row layout)
-                    if (mainGrid.RowDefinitions.Count >= 2)
-                    {
-                        var contentRow = mainGrid.RowDefinitions[1]; // Middle row with main content
-
-                        if (keyboardVisible)
-                        {
-                            // Reduce content area height to make room for keyboard (keyboard height ~280px)
-                            // Don't touch navigation - keyboard appears above it
-                            contentRow.Height = new GridLength(1, GridUnitType.Star);
-
-                            // Optional: You could reduce content area if needed
-                            // mainGrid.Margin = new Thickness(0, 0, 0, 0);
-                        }
-                        else
-                        {
-                            // Restore normal content area
-                            contentRow.Height = new GridLength(1, GridUnitType.Star);
-                            mainGrid.Margin = new Thickness(0);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error adjusting layout for keyboard: {ex.Message}");
-            }
+            // DO NOTHING - keep navigation fixed
+            // Content scrolling will be handled by individual views
         }
-
         /// <summary>
         /// Override Window closing to cleanup keyboard service
         /// </summary>

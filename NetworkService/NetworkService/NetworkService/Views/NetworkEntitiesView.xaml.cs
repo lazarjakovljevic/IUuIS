@@ -4,6 +4,7 @@ using NetworkService.ViewModel;
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace NetworkService.Views
 {
@@ -26,6 +27,8 @@ namespace NetworkService.Views
         {
             InitializeComponent();
             InitializeVirtualKeyboard();
+
+            VirtualKeyboardService.Instance.KeyboardVisibilityChanged += OnKeyboardVisibilityChanged;
         }
 
         #endregion
@@ -182,7 +185,7 @@ namespace NetworkService.Views
             try
             {
                 // Add tooltip indicating virtual keyboard usage
-                textBox.ToolTip = "📱 Tap to open virtual keyboard";
+                textBox.ToolTip = "Tap to open virtual keyboard";
 
                 // Add cursor change to indicate mobile interaction
                 textBox.Cursor = System.Windows.Input.Cursors.Hand;
@@ -238,6 +241,91 @@ namespace NetworkService.Views
         #region Event Handlers
 
         /// <summary>
+        /// Handle keyboard visibility changes - add bottom padding for ALL TextBoxes
+        /// </summary>
+        private void OnKeyboardVisibilityChanged(object sender, KeyboardVisibilityEventArgs e)
+        {
+            try
+            {
+                var scrollViewer = FindScrollViewer(this);
+
+                if (scrollViewer != null)
+                {
+                    if (e.IsVisible)
+                    {
+                        // Always add padding when keyboard visible
+                        scrollViewer.Padding = new Thickness(0, 0, 0, 275);
+
+                        // Smart positioning based on TextBox type
+                        if (IsFilterTextBox(e.TargetTextBox))
+                        {
+                            // Filter TextBox - scroll to middle
+                            var middlePosition = scrollViewer.ScrollableHeight * 0.75;
+                            scrollViewer.ScrollToVerticalOffset(middlePosition);
+                            Console.WriteLine("Scrolled to middle for filter TextBox");
+                        }
+                        else
+                        {
+                            // Entity form TextBoxes - scroll to bottom
+                            scrollViewer.ScrollToBottom();
+                            Console.WriteLine("Scrolled to bottom for entity form TextBox");
+                        }
+                    }
+                    else
+                    {
+                        // Remove padding and scroll to top when keyboard hidden
+                        scrollViewer.Padding = new Thickness(0);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error handling keyboard visibility change: {ex.Message}");
+            }
+        }
+
+        private ScrollViewer FindScrollViewer(DependencyObject parent)
+        {
+            if (parent is ScrollViewer scrollViewer)
+                return scrollViewer;
+
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                var result = FindScrollViewer(child);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Check if TextBox is filter TextBox (top of page)
+        /// </summary>
+        private bool IsFilterTextBox(TextBox textBox)
+        {
+            if (textBox == null) return false;
+
+            try
+            {
+                var binding = textBox.GetBindingExpression(TextBox.TextProperty);
+                if (binding?.ParentBinding?.Path?.Path != null)
+                {
+                    var path = binding.ParentBinding.Path.Path;
+                    return path.Contains("Filter"); // Filter TextBox uses FilterIdValue binding
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Handle virtual keyboard input
         /// </summary>
         private void OnVirtualKeyboardInput(object sender, VirtualKeyEventArgs e)
@@ -260,34 +348,6 @@ namespace NetworkService.Views
             catch (Exception ex)
             {
                 Console.WriteLine($"Error handling virtual keyboard input: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Handle keyboard visibility changes
-        /// </summary>
-        private void OnKeyboardVisibilityChanged(object sender, KeyboardVisibilityEventArgs e)
-        {
-            try
-            {
-                if (e.IsVisible)
-                {
-                    Console.WriteLine($"Virtual keyboard shown for: {e.TargetTextBox?.Name ?? "Unknown"}");
-
-                    // You could adjust view layout here if needed for keyboard
-                    // For example, scroll to ensure TextBox is visible
-                    EnsureTextBoxVisible(e.TargetTextBox);
-                }
-                else
-                {
-                    Console.WriteLine("Virtual keyboard hidden");
-
-                    // Restore normal layout
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error handling keyboard visibility change: {ex.Message}");
             }
         }
 
@@ -339,28 +399,6 @@ namespace NetworkService.Views
         }
 
         /// <summary>
-        /// Ensure TextBox is visible when keyboard is shown
-        /// </summary>
-        private void EnsureTextBoxVisible(TextBox textBox)
-        {
-            if (textBox == null) return;
-
-            try
-            {
-                // Find parent ScrollViewer and scroll to TextBox
-                var scrollViewer = FindParent<ScrollViewer>(textBox);
-                if (scrollViewer != null)
-                {
-                    textBox.BringIntoView();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error ensuring TextBox visibility: {ex.Message}");
-            }
-        }
-
-        /// <summary>
         /// Check if TextBox is in Add Entity form
         /// </summary>
         private bool IsInAddEntityForm(TextBox textBox)
@@ -406,19 +444,6 @@ namespace NetworkService.Views
             }
         }
 
-        /// <summary>
-        /// Find parent control of specific type
-        /// </summary>
-        private T FindParent<T>(DependencyObject child) where T : DependencyObject
-        {
-            var parent = System.Windows.Media.VisualTreeHelper.GetParent(child);
-            while (parent != null && !(parent is T))
-            {
-                parent = System.Windows.Media.VisualTreeHelper.GetParent(parent);
-            }
-            return parent as T;
-        }
-
         #endregion
 
         #region Cleanup
@@ -433,7 +458,7 @@ namespace NetworkService.Views
                 if (keyboardService != null)
                 {
                     keyboardService.TextInput -= OnVirtualKeyboardInput;
-                    keyboardService.KeyboardVisibilityChanged -= OnKeyboardVisibilityChanged;
+                    VirtualKeyboardService.Instance.KeyboardVisibilityChanged -= OnKeyboardVisibilityChanged;
 
                     // Unregister all TextBoxes
                     var textBoxes = FindTextBoxes(this);
