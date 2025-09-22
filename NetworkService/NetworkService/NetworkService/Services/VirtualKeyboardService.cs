@@ -296,7 +296,7 @@ namespace NetworkService.Services
                 CurrentKeyboard = new VirtualKeyboard();
 
                 // FORCE EXPLICIT DIMENSIONS FOR TESTING
-                CurrentKeyboard.Width = 580;  // Close to MainWindow width (600)
+                CurrentKeyboard.Width = 580;  // Close to MainWindow width
                 CurrentKeyboard.Height = 280; // Standard keyboard height
                 CurrentKeyboard.MinWidth = 400;
                 CurrentKeyboard.MinHeight = 200;
@@ -317,7 +317,7 @@ namespace NetworkService.Services
         }
 
         /// <summary>
-        /// Position keyboard at bottom of content area (Row 1)
+        /// Position keyboard at bottom with proper measurements for animations
         /// </summary>
         private void PositionKeyboard()
         {
@@ -325,28 +325,33 @@ namespace NetworkService.Services
 
             try
             {
-                Console.WriteLine("Positioning keyboard at bottom of content area");
+                Console.WriteLine("📐 Positioning keyboard with proper measurements...");
 
-                // CRITICAL: Set to Row 1 (main content area) - NOT Row 0
+                // CRITICAL: Set to Row 1 (main content area)
                 Grid.SetRow(CurrentKeyboard, 1);
 
                 // Position at absolute bottom of Row 1
                 CurrentKeyboard.VerticalAlignment = VerticalAlignment.Bottom;
                 CurrentKeyboard.HorizontalAlignment = HorizontalAlignment.Stretch;
-                CurrentKeyboard.Margin = new Thickness(0,0,5,0);
+                CurrentKeyboard.Margin = new Thickness(0, 0, 5, 0);
 
-                // Ensure high Z-index so it appears above content
+                // Force measurement for animation calculations
+                CurrentKeyboard.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                CurrentKeyboard.Arrange(new Rect(CurrentKeyboard.DesiredSize));
+
+                // Ensure high Z-index
                 Panel.SetZIndex(CurrentKeyboard, 1000);
 
-                Console.WriteLine("Keyboard positioned in Grid Row 1 at bottom");
+                Console.WriteLine($"📐 Keyboard positioned - Size: {CurrentKeyboard.DesiredSize}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error positioning keyboard: {ex.Message}");
+                Console.WriteLine($"❌ Error positioning keyboard: {ex.Message}");
             }
         }
+
         /// <summary>
-        /// Show keyboard FIXED - always reset opacity
+        /// Show keyboard with smooth slide-up animation (mobile style)
         /// </summary>
         private void ShowKeyboardWithAnimation()
         {
@@ -354,23 +359,59 @@ namespace NetworkService.Services
 
             try
             {
-                Console.WriteLine("✅ FORCE Setting keyboard to FULLY VISIBLE - FIXED opacity reset");
+                Console.WriteLine("🎬 Starting smooth show animation...");
 
-                // ALWAYS RESET TO VISIBLE STATE
-                CurrentKeyboard.Opacity = 1;
-                CurrentKeyboard.RenderTransform = new TranslateTransform(0, 0);
+                // Set initial state for animation
                 CurrentKeyboard.Visibility = Visibility.Visible;
+                CurrentKeyboard.Opacity = 0;
+
+                // Start keyboard BELOW the screen (slide up effect)
+                var slideTransform = new TranslateTransform(0, CurrentKeyboard.Height + 50);
+                CurrentKeyboard.RenderTransform = slideTransform;
 
                 // Set high Z-index to ensure it's on top
                 Panel.SetZIndex(CurrentKeyboard, 9999);
 
-                Console.WriteLine($"✅ FORCED keyboard opacity: {CurrentKeyboard.Opacity}");
-                Console.WriteLine($"✅ FORCED keyboard visibility: {CurrentKeyboard.Visibility}");
-                Console.WriteLine($"✅ FORCED keyboard Z-index: {Panel.GetZIndex(CurrentKeyboard)}");
+                // Create smooth animations
+                var duration = TimeSpan.FromMilliseconds(250); // Nice smooth duration
+
+                // 1. SLIDE UP Animation (Y position)
+                var slideAnimation = new DoubleAnimation
+                {
+                    From = CurrentKeyboard.Height + 50,  // Start below screen
+                    To = 0,                              // End at normal position
+                    Duration = new Duration(duration),
+                    EasingFunction = new CubicEase         // Smooth cubic ease out
+                    {
+                        EasingMode = EasingMode.EaseOut
+                    }
+                };
+
+                // 2. FADE IN Animation (Opacity)
+                var fadeAnimation = new DoubleAnimation
+                {
+                    From = 0,
+                    To = 1,
+                    Duration = new Duration(duration),
+                    EasingFunction = new QuadraticEase     // Gentle fade
+                    {
+                        EasingMode = EasingMode.EaseOut
+                    }
+                };
+
+                // Apply animations
+                slideTransform.BeginAnimation(TranslateTransform.YProperty, slideAnimation);
+                CurrentKeyboard.BeginAnimation(UIElement.OpacityProperty, fadeAnimation);
+
+                Console.WriteLine("✨ Smooth show animation started - slide up + fade in");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error showing keyboard: {ex.Message}");
+                Console.WriteLine($"❌ Error in show animation: {ex.Message}");
+                // Fallback to instant show
+                CurrentKeyboard.Opacity = 1;
+                CurrentKeyboard.RenderTransform = new TranslateTransform(0, 0);
+                CurrentKeyboard.Visibility = Visibility.Visible;
             }
         }
 
@@ -379,27 +420,81 @@ namespace NetworkService.Services
         /// </summary>
         private void HideKeyboardWithAnimation(Action onCompleted = null)
         {
-            if (CurrentKeyboard == null) return;
+            if (CurrentKeyboard == null)
+            {
+                onCompleted?.Invoke();
+                return;
+            }
 
             try
             {
-                Console.WriteLine("🔧 HIDING keyboard - simple version");
+                Console.WriteLine("🎬 Starting smooth hide animation...");
 
-                // SIMPLE HIDE WITHOUT BROKEN ANIMATIONS
-                CurrentKeyboard.Visibility = Visibility.Collapsed;
+                var duration = TimeSpan.FromMilliseconds(150); // Slightly faster hide
 
-                // Execute callback immediately
-                onCompleted?.Invoke();
+                // Get current transform or create new one
+                var slideTransform = CurrentKeyboard.RenderTransform as TranslateTransform
+                                   ?? new TranslateTransform(0, 0);
+                CurrentKeyboard.RenderTransform = slideTransform;
 
-                Console.WriteLine("✅ Keyboard hidden successfully");
+                // 1. SLIDE DOWN Animation (Y position)
+                var slideAnimation = new DoubleAnimation
+                {
+                    From = 0,                              // Start at current position
+                    To = CurrentKeyboard.ActualHeight + 30, // Slide below screen
+                    Duration = new Duration(duration),
+                    EasingFunction = new CubicEase           // Smooth cubic ease in
+                    {
+                        EasingMode = EasingMode.EaseIn
+                    }
+                };
+
+                // 2. FADE OUT Animation (Opacity) 
+                var fadeAnimation = new DoubleAnimation
+                {
+                    From = 1,
+                    To = 0,
+                    Duration = new Duration(duration),
+                    EasingFunction = new QuadraticEase       // Quick fade out
+                    {
+                        EasingMode = EasingMode.EaseIn
+                    }
+                };
+
+                // Handle animation completion
+                slideAnimation.Completed += (s, e) =>
+                {
+                    try
+                    {
+                        // Clean up after animation
+                        CurrentKeyboard.Visibility = Visibility.Collapsed;
+                        CurrentKeyboard.Opacity = 1; // Reset for next show
+                        CurrentKeyboard.RenderTransform = new TranslateTransform(0, 0);
+
+                        Console.WriteLine("✅ Smooth hide animation completed");
+                        onCompleted?.Invoke();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"❌ Error in hide animation cleanup: {ex.Message}");
+                        onCompleted?.Invoke();
+                    }
+                };
+
+                // Start animations
+                slideTransform.BeginAnimation(TranslateTransform.YProperty, slideAnimation);
+                CurrentKeyboard.BeginAnimation(UIElement.OpacityProperty, fadeAnimation);
+
+                Console.WriteLine("✨ Smooth hide animation started - slide down + fade out");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error hiding keyboard: {ex.Message}");
+                Console.WriteLine($"❌ Error in hide animation: {ex.Message}");
+                // Fallback to instant hide
+                CurrentKeyboard.Visibility = Visibility.Collapsed;
                 onCompleted?.Invoke();
             }
         }
-
         #endregion
 
         #region Event Handlers
@@ -472,10 +567,16 @@ namespace NetworkService.Services
         /// </summary>
         private void OnKeyboardKeyPressed(object sender, VirtualKeyEventArgs e)
         {
-            // Forward event to subscribers
+            // Forward event to subscribers za text processing
             TextInput?.Invoke(this, e);
 
             Console.WriteLine($"⌨️ Virtual key pressed: {e.Key} ({e.Action})");
+
+            // UKLONJEN PROBLEMATIČAN KOD:
+            // NE POZIVAMO KeyboardVisibilityChanged ovde jer tastatura je već vidljiva!
+            // Ovo je bio uzrok duplog scroll-a
+
+            // Ako treba neka logika za text input, raditi direktno sa TextInput event-om
         }
 
         /// <summary>

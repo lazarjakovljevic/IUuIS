@@ -254,7 +254,7 @@ namespace NetworkService.Views
                     if (e.IsVisible)
                     {
                         // Always add padding when keyboard visible
-                        scrollViewer.Padding = new Thickness(0, 0, 0, 275);
+
 
                         // Smart positioning based on TextBox type
                         if (IsFilterTextBox(e.TargetTextBox))
@@ -266,6 +266,7 @@ namespace NetworkService.Views
                         }
                         else
                         {
+                            scrollViewer.Padding = new Thickness(0, 0, 0, 275);
                             // Entity form TextBoxes - scroll to bottom
                             scrollViewer.ScrollToBottom();
                             Console.WriteLine("Scrolled to bottom for entity form TextBox");
@@ -275,6 +276,7 @@ namespace NetworkService.Views
                     {
                         // Remove padding and scroll to top when keyboard hidden
                         scrollViewer.Padding = new Thickness(0);
+
                     }
                 }
             }
@@ -445,6 +447,8 @@ namespace NetworkService.Views
         }
 
         #endregion
+
+
 
         #region Cleanup
 

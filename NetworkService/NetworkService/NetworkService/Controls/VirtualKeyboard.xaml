@@ -4,8 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             Width="565" Height="280"
-             d:DesignHeight="280" d:DesignWidth="560">
+             Width="570" Height="280"
+             d:DesignHeight="280" d:DesignWidth="570">
 
     <!-- #region Keyboard Resources -->
     <UserControl.Resources>
@@ -80,8 +80,7 @@
             BorderBrush="#FF404040" 
             BorderThickness="0" 
             CornerRadius="0"
-            Width="565" Height="280"
-            Margin="0,0,15,0">
+            Width="570" Height="280">
         <Grid Margin="8">
             <Grid.RowDefinitions>
                 <!-- Header with close button -->
@@ -105,12 +104,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" 
-                          Text="Virtual Keyboard" 
-                          Foreground="#FFF0F0F0" 
-                          FontSize="14" 
-                          FontWeight="Bold"
-                          VerticalAlignment="Center"/>
+                
 
                 <Button Grid.Column="1" 
                         Name="CloseButton"

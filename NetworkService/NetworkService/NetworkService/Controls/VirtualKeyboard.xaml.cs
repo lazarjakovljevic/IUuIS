@@ -108,7 +108,7 @@ namespace NetworkService.Controls
         {
             try
             {
-                // Fire key pressed event for Enter
+                // SAMO za Enter zadržavamo event jer treba da se zatvori tastatura
                 OnKeyPressed(new VirtualKeyEventArgs { Key = "Enter", Action = VirtualKeyAction.Enter });
 
                 // Close keyboard after Enter (mobile behavior)
@@ -137,11 +137,11 @@ namespace NetworkService.Controls
                     TargetTextBox.Text = newText;
                     TargetTextBox.CaretIndex = caretIndex - 1;
 
-                    OnKeyPressed(new VirtualKeyEventArgs { Key = "Backspace", Action = VirtualKeyAction.Backspace });
+                    // UKLONJEN OnKeyPressed poziv - isti problem kao gore
+                    Console.WriteLine("⌫ Backspace processed without triggering events");
                 }
             }
         }
-
         /// <summary>
         /// Handle shift key click (toggle uppercase/lowercase)
         /// </summary>
@@ -190,14 +190,9 @@ namespace NetworkService.Controls
                 string newText = currentText.Insert(caretIndex, keyValue);
                 TargetTextBox.Text = newText;
                 TargetTextBox.CaretIndex = caretIndex + keyValue.Length;
-
-                // Keep focus on target TextBox
-                TargetTextBox.Focus();
-
-                // Fire key pressed event
-                OnKeyPressed(new VirtualKeyEventArgs { Key = keyValue, Action = VirtualKeyAction.Character });
             }
         }
+
 
         /// <summary>
         /// Update keyboard visual state based on current mode
@@ -281,7 +276,14 @@ namespace NetworkService.Controls
         }
 
         #endregion
+
+
+
+
     }
+
+
+
 
     #region Event Args and Enums
 
