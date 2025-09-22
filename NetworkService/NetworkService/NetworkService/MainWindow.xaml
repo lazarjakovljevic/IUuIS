@@ -55,12 +55,12 @@
 
                 <!-- Undo Button -->
                 <Button Grid.Column="2" 
-        Name="UndoButton"
-        Background="#2E3440" 
-        BorderThickness="0"
-        Command="{Binding UndoCommand}"
-        Cursor="Hand"
-        ToolTip="Undo">
+                        Name="UndoButton"
+                        Background="#2E3440" 
+                        BorderThickness="0"
+                        Command="{Binding UndoCommand}"
+                        Cursor="Hand"
+                        ToolTip="Undo">
                     <StackPanel>
                         <TextBlock Text="↶" FontSize="24" HorizontalAlignment="Center">
                             <TextBlock.Style>

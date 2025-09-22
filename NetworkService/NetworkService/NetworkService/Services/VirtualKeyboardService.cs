@@ -296,7 +296,7 @@ namespace NetworkService.Services
                 CurrentKeyboard = new VirtualKeyboard();
 
                 // FORCE EXPLICIT DIMENSIONS FOR TESTING
-                CurrentKeyboard.Width = 580;  // Close to MainWindow width
+                CurrentKeyboard.Width = 600;  // Close to MainWindow width
                 CurrentKeyboard.Height = 280; // Standard keyboard height
                 CurrentKeyboard.MinWidth = 400;
                 CurrentKeyboard.MinHeight = 200;
@@ -333,7 +333,7 @@ namespace NetworkService.Services
                 // Position at absolute bottom of Row 1
                 CurrentKeyboard.VerticalAlignment = VerticalAlignment.Bottom;
                 CurrentKeyboard.HorizontalAlignment = HorizontalAlignment.Stretch;
-                CurrentKeyboard.Margin = new Thickness(0, 0, 5, 0);
+                CurrentKeyboard.Margin = new Thickness(0, 0, 0, 0);
 
                 // Force measurement for animation calculations
                 CurrentKeyboard.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));

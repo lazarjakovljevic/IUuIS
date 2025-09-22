@@ -4,8 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             Width="570" Height="280"
-             d:DesignHeight="280" d:DesignWidth="570">
+             Height="280"
+             Width="605"
+             d:DesignHeight="280" d:DesignWidth="580">
 
     <!-- #region Keyboard Resources -->
     <UserControl.Resources>
@@ -76,12 +77,12 @@
     <!-- #endregion -->
 
     <!-- #region Main Keyboard Layout -->
-    <Border Background="#FF1E1E1E" 
-            BorderBrush="#FF404040" 
-            BorderThickness="0" 
+    <Border Background="#3B4252" 
             CornerRadius="0"
-            Width="570" Height="280">
-        <Grid Margin="8">
+            Height="280" 
+            Margin="0,0,0,0">
+          
+        <Grid Margin="8,8,22,8">
             <Grid.RowDefinitions>
                 <!-- Header with close button -->
                 <RowDefinition Height="Auto"/>
@@ -203,13 +204,13 @@
             <!-- #region Action Row -->
             <Grid Grid.Row="5">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.2*"/>
-                    <ColumnDefinition Width="4*"/>
-                    <ColumnDefinition Width="1.2*"/>
-                    <ColumnDefinition Width="1.2*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0" Content="123" Style="{StaticResource SpecialKeyStyle}" Click="NumberModeKey_Click" ToolTip="Switch to numbers"/>
+
                 <Button Grid.Column="1" Content="Space" Style="{StaticResource SpecialKeyStyle}" Click="SpaceKey_Click"/>
                 <Button Grid.Column="2" Content="." Style="{StaticResource KeyboardKeyStyle}" Click="PeriodKey_Click"/>
                 <Button Grid.Column="3" Content="Enter" Style="{StaticResource ActionKeyStyle}" Click="EnterKey_Click"/>
