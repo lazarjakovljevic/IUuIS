@@ -61,6 +61,9 @@
     <Compile Include="Commands\MoveEntityCommand.cs" />
     <Compile Include="Commands\SelectEntityCommand.cs" />
     <Compile Include="Commands\UndoManager.cs" />
+    <Compile Include="Controls\VirtualKeyboard.xaml.cs">
+      <DependentUpon>VirtualKeyboard.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Model\Connection.cs" />
     <Compile Include="Model\EntityTypes.cs" />
     <Compile Include="Model\Measurements.cs" />
@@ -70,6 +73,7 @@
     <Compile Include="MVVM\ViewModelLocator.cs" />
     <Compile Include="Services\ConnectionManager.cs" />
     <Compile Include="Services\MeasurementService.cs" />
+    <Compile Include="Services\VirtualKeyboardService.cs" />
     <Compile Include="ViewModel\HomeViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\MeasurementGraphViewModel.cs" />
@@ -87,6 +91,10 @@
     <Compile Include="Views\NetworkEntitiesView.xaml.cs">
       <DependentUpon>NetworkEntitiesView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\VirtualKeyboard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

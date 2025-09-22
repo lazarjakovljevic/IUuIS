@@ -41,7 +41,7 @@ namespace NetworkService.ViewModel
 
         #region TCP Communication
 
-        private int count = 6; // Initial number of objects in system
+        //private int count = 6; // Initial number of objects in system
         private MeasurementService measurementService;
 
         #endregion
@@ -177,7 +177,7 @@ namespace NetworkService.ViewModel
                                     if (incoming.Equals("Need object count"))
                                     {
                                         // Response - send count of monitored objects
-                                        int currentCount = SharedEntities?.Count ?? count;
+                                        int currentCount = SharedEntities?.Count ?? 0;
                                         byte[] data = System.Text.Encoding.ASCII.GetBytes(currentCount.ToString());
                                         stream.Write(data, 0, data.Length);
 
