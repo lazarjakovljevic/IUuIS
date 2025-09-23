@@ -29,6 +29,14 @@ namespace NetworkService.Views
             InitializeVirtualKeyboard();
 
             VirtualKeyboardService.Instance.KeyboardVisibilityChanged += OnKeyboardVisibilityChanged;
+
+            this.DataContextChanged += (s, e) =>
+            {
+                if (e.NewValue is NetworkEntitiesViewModel viewModel)
+                {
+                    viewModel.ScrollToTopAction = OnScrollToTopRequested;
+                }
+            };
         }
 
         #endregion
@@ -443,6 +451,19 @@ namespace NetworkService.Views
             catch (Exception ex)
             {
                 Console.WriteLine($"Error triggering add entity: {ex.Message}");
+            }
+        }
+
+        private void OnScrollToTopRequested()
+        {
+            try
+            {
+                // Scroll to top
+                EntitiesScrollViewer.ScrollToTop();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error scrolling to top: {ex.Message}");
             }
         }
 

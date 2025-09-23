@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace NetworkService.ViewModel
@@ -28,6 +29,8 @@ namespace NetworkService.ViewModel
         #endregion
 
         #region Properties
+
+        public Action ScrollToTopAction { get; set; }
 
         // Collections
         private ObservableCollection<PowerConsumptionEntity> entities;
@@ -349,6 +352,8 @@ namespace NetworkService.ViewModel
 
                 MessageBox.Show("Entity added successfully!", "Success",
                     MessageBoxButton.OK, MessageBoxImage.Information);
+
+                ScrollToTopAction?.Invoke();
             }
             catch (Exception ex)
             {

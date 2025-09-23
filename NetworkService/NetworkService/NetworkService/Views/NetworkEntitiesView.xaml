@@ -122,7 +122,7 @@
     </UserControl.Resources>
     
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer x:Name="EntitiesScrollViewer" VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
 
             <!-- Header -->

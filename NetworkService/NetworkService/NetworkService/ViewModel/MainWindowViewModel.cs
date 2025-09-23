@@ -5,6 +5,7 @@ using NetworkService.Services;
 using NetworkService.Views;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -176,12 +177,16 @@ namespace NetworkService.ViewModel
                                     // Process different message types
                                     if (incoming.Equals("Need object count"))
                                     {
-                                        // Response - send count of monitored objects
-                                        int currentCount = SharedEntities?.Count ?? 0;
-                                        byte[] data = System.Text.Encoding.ASCII.GetBytes(currentCount.ToString());
+                                        int maxIdPlusOne = 0;
+                                        if (SharedEntities != null && SharedEntities.Count > 0)
+                                        {
+                                            maxIdPlusOne = SharedEntities.Max(e => e.Id) + 1;
+                                        }
+
+                                        byte[] data = System.Text.Encoding.ASCII.GetBytes(maxIdPlusOne.ToString());
                                         stream.Write(data, 0, data.Length);
 
-                                        Console.WriteLine($"Sent object count: {currentCount}");
+                                        Console.WriteLine($"Sent max ID + 1: {maxIdPlusOne}");
                                     }
                                     else if (incoming.StartsWith("Entitet_") && incoming.Contains(":"))
                                     {
@@ -274,13 +279,17 @@ namespace NetworkService.ViewModel
 
         private void OnAlertTriggered(string alertMessage)
         {
-            // Log alert instead of showing blocking MessageBox
-            Console.WriteLine($"ALERT: {alertMessage}");
-
-            // You can add a non-blocking notification here later
-            // For now, just log to console to not block UI thread
+            // UI thread
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MessageBox.Show(
+                    alertMessage,                           
+                    "Alert",         
+                    MessageBoxButton.OK,                    
+                    MessageBoxImage.Warning                
+                );
+            });
         }
-
         #endregion
 
         #region Network Display Support
