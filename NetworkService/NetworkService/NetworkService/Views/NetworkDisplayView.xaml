@@ -7,6 +7,77 @@
              mc:Ignorable="d" 
              d:DesignHeight="750" d:DesignWidth="600">
 
+    <UserControl.Resources>
+        <Style x:Key="RoundedButton" TargetType="Button">
+            <Setter Property="Background" Value="#5E81AC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#81A1C1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#4C7299"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#D8DEE9"/>
+                                <Setter Property="Foreground" Value="#4C566A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Danger Button Style (za Clear Network) -->
+        <Style x:Key="DangerButton" TargetType="Button">
+            <Setter Property="Background" Value="#BF616A"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#A54E57"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#8B4248"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#D8DEE9"/>
+                                <Setter Property="Foreground" Value="#4C566A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="180"/>
@@ -398,7 +469,7 @@
                 </Canvas>
 
                 <!-- Network Controls -->
-                <Grid Margin="0,10,0,0">
+                <Grid Margin="0,-10,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -407,28 +478,21 @@
                     <Button Grid.Column="0" 
                             Name="ToggleConnectionsButton"
                             Content="🔗 Toggle Lines" 
-                            Background="#5E81AC" 
-                            Foreground="White" 
-                            Height="30" 
-                            BorderThickness="0" 
+                            Style="{StaticResource RoundedButton}"
+                            Height="40" 
                             Click="ToggleConnectionsButton_Click"
-                            Cursor="Hand"
                             Margin="0,0,5,0"
-                            ToolTip="Show/Hide connection lines"/>
+                            ToolTip="Show/Hide connection lines between entities"/>
 
                     <Button Grid.Column="1" 
                             Name="ClearNetworkButton"
                             Content="🗑️ Clear Network" 
-                            Background="#BF616A" 
-                            Foreground="White" 
-                            Height="30" 
-                            BorderThickness="0" 
+                            Style="{StaticResource DangerButton}"
+                            Height="40" 
                             Click="ClearNetworkButton_Click"
-                            Cursor="Hand"
                             Margin="5,0,0,0"
-                            ToolTip="Remove all entities from network"/>
+                            ToolTip="Remove all entities from network display"/>
                 </Grid>
-
             </StackPanel>
         </Border>
 
