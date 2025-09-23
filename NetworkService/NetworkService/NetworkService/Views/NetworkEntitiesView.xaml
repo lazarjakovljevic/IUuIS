@@ -117,8 +117,18 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        
-        
+
+        <!-- Filter TextBox Style with Error State -->
+        <Style x:Key="FilterTextBox" TargetType="TextBox" BasedOn="{StaticResource ModernTextBox}">
+            <Style.Triggers>
+                <!-- Error State - crvena ivica -->
+                <DataTrigger Binding="{Binding HasFilterIdError}" Value="True">
+                    <Setter Property="BorderBrush" Value="#BF616A"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
     </UserControl.Resources>
     
 
@@ -238,8 +248,10 @@
                                       FontWeight="SemiBold"
                                       Margin="0,0,0,8"/>
                             <Grid>
-                                <TextBox Text="{Binding FilterIdValue, UpdateSourceTrigger=PropertyChanged}" 
-                                        Style="{StaticResource ModernTextBox}"/>
+                                <TextBox x:Name="FilterIdTextBox"
+                                 Text="{Binding FilterIdValue, UpdateSourceTrigger=PropertyChanged}" 
+                                 Style="{StaticResource FilterTextBox}"/>
+                                                           
                                 <TextBlock Text="Enter ID here..." 
                                           Foreground="Gray" 
                                           VerticalAlignment="Center" 
@@ -259,7 +271,6 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
-                                
                             </Grid>
                         </StackPanel>
 

@@ -5,6 +5,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -142,8 +143,24 @@ namespace NetworkService.ViewModel
             get { return filterIdValue; }
             set
             {
-                SetProperty(ref filterIdValue, value);
-                ApplyFilters(); 
+                // Filtriraj input - zadržava samo brojeve
+                string filteredValue = FilterNumericInput(value);
+
+                // Proveri da li je korisnik pokušao da unese nevalidan karakter
+                if (value != filteredValue)
+                {
+                    // Postavi error state jer je pokušao nevalidan unos
+                    TriggerFilterIdError();
+                }
+                else
+                {
+                    // Ukloni error state jer je unos valjan
+                    HasFilterIdError = false;
+                }
+
+                // Postavi samo validnu vrednost
+                SetProperty(ref filterIdValue, filteredValue);
+                ApplyFilters();
             }
         }
 
@@ -204,6 +221,13 @@ namespace NetworkService.ViewModel
             }
         }
 
+        private bool hasFilterIdError = false;
+        public bool HasFilterIdError
+        {
+            get { return hasFilterIdError; }
+            set { SetProperty(ref hasFilterIdError, value); }
+        }
+
         #endregion
 
         #region Constructor
@@ -262,11 +286,41 @@ namespace NetworkService.ViewModel
 
         #region Validation
 
+        private string FilterNumericInput(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            string result = "";
+            foreach (char c in input)
+            {
+                if (char.IsDigit(c))
+                {
+                    result += c;
+                }
+            }
+            return result;
+        }
+
+        public void TriggerFilterIdError()
+        {
+            HasFilterIdError = true;
+
+            var timer = new System.Windows.Threading.DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(250);
+            timer.Tick += (s, e) =>
+            {
+                HasFilterIdError = false;
+                timer.Stop();
+            };
+            timer.Start();
+        }
+
         private void ValidateId()
         {
             if (string.IsNullOrWhiteSpace(NewEntityId))
             {
-                IdValidationMessage = "ID is required";
+                IdValidationMessage = "";
                 return;
             }
 
@@ -276,7 +330,7 @@ namespace NetworkService.ViewModel
                 return;
             }
 
-            if (id <= 0)
+            if (id < 0)
             {
                 IdValidationMessage = "ID must be positive";
                 return;
@@ -293,9 +347,10 @@ namespace NetworkService.ViewModel
 
         private void ValidateName()
         {
+            // Ako je polje prazno, ukloni poruku
             if (string.IsNullOrWhiteSpace(NewEntityName))
             {
-                NameValidationMessage = "Name is required";
+                NameValidationMessage = "";
                 return;
             }
 
@@ -310,12 +365,14 @@ namespace NetworkService.ViewModel
 
         private void ValidateType()
         {
+            // Ako tip nije selektovan, ukloni poruku
             if (NewEntityType == null)
             {
-                TypeValidationMessage = "Type is required";
+                TypeValidationMessage = "";
                 return;
             }
 
+            // Nema drugih validacija za tip
             TypeValidationMessage = "";
         }
 
@@ -336,7 +393,27 @@ namespace NetworkService.ViewModel
         private void OnAddEntity()
         {
             try
-            {
+            { 
+                if (string.IsNullOrWhiteSpace(NewEntityId))
+                {
+                    IdValidationMessage = "ID is required";
+                }
+
+                if (string.IsNullOrWhiteSpace(NewEntityName))
+                {
+                    NameValidationMessage = "Name is required";
+                }
+
+                if (NewEntityType == null)
+                {
+                    TypeValidationMessage = "Type is required";
+                }
+
+                if (!CanAddEntity())
+                {
+                    return;
+                }
+
                 var newEntity = new PowerConsumptionEntity(
                     int.Parse(NewEntityId),
                     NewEntityName.Trim(),
@@ -361,6 +438,7 @@ namespace NetworkService.ViewModel
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private bool CanDeleteEntity()
         {

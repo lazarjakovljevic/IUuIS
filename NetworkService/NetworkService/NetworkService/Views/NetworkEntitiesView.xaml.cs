@@ -2,8 +2,10 @@
 using NetworkService.Services;
 using NetworkService.ViewModel;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace NetworkService.Views
@@ -247,6 +249,36 @@ namespace NetworkService.Views
         #endregion
 
         #region Event Handlers
+
+        private void FilterIdTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            try
+            {
+                // Proveri da li su svi karakteri brojevi
+                if (!IsTextAllowed(e.Text))
+                {
+                    // Blokiraj unos nevalidnih karaktera
+                    e.Handled = true;
+
+                    // Postavi error state u ViewModel
+                    if (DataContext is NetworkEntitiesViewModel viewModel)
+                    {
+                        viewModel.TriggerFilterIdError();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in FilterId validation: {ex.Message}");
+            }
+        }
+
+        private bool IsTextAllowed(string text)
+        {
+            return text.All(char.IsDigit);
+        }
+
+
 
         /// <summary>
         /// Handle keyboard visibility changes - add bottom padding for ALL TextBoxes
