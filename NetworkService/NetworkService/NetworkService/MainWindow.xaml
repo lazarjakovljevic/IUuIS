@@ -8,7 +8,7 @@
         Title="Network Infrastructure System" 
         Height="900" Width="600"
         ResizeMode="CanMinimize"
-        WindowStartupLocation="CenterScreen" Icon="/meter-tool.png">
+        WindowStartupLocation="CenterScreen" Icon="/Resources/Images/meter-tool.png">
 
     <Grid>
         <Grid.RowDefinitions>

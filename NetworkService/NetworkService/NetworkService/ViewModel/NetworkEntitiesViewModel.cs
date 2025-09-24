@@ -1,6 +1,8 @@
 ﻿using NetworkService.Commands;
+using NetworkService.Controls;
 using NetworkService.Model;
 using NetworkService.MVVM;
+using NetworkService.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -9,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 
 namespace NetworkService.ViewModel
 {
@@ -214,6 +217,42 @@ namespace NetworkService.ViewModel
         {
             get { return hasFilterIdError; }
             set { SetProperty(ref hasFilterIdError, value); }
+        }
+
+        #endregion
+
+        #region Virtual Keyboard Integration
+
+        private VirtualKeyboardService keyboardService;
+        public void InitializeVirtualKeyboard()
+        {
+            try
+            {
+                keyboardService = VirtualKeyboardService.Instance;
+                keyboardService.TextInput += OnGlobalKeyboardInput;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing virtual keyboard in NetworkEntitiesViewModel: {ex.Message}");
+            }
+        }
+
+        private void OnGlobalKeyboardInput(object sender, VirtualKeyEventArgs e)
+        {
+            try
+            {
+                switch (e.Action)
+                {
+                    case VirtualKeyAction.Enter:
+                        break;
+                    case VirtualKeyAction.Backspace:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error handling global keyboard input: {ex.Message}");
+            }
         }
 
         #endregion

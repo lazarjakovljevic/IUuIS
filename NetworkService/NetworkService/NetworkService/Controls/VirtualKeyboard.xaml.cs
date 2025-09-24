@@ -71,7 +71,6 @@ namespace NetworkService.Controls
             {
                 OnKeyPressed(new VirtualKeyEventArgs { Key = "Enter", Action = VirtualKeyAction.Enter });
                 CloseRequested?.Invoke(this, EventArgs.Empty);
-                Console.WriteLine("Enter pressed - keyboard closing");
             }
             catch (Exception ex)
             {
@@ -90,7 +89,6 @@ namespace NetworkService.Controls
                     string newText = currentText.Remove(caretIndex - 1, 1);
                     TargetTextBox.Text = newText;
                     TargetTextBox.CaretIndex = caretIndex - 1;
-                    Console.WriteLine("⌫ Backspace processed");
                 }
             }
         }
@@ -126,12 +124,10 @@ namespace NetworkService.Controls
 
         private void UpdateLetterButtons()
         {
-            Console.WriteLine($"Keyboard mode updated: Shift={IsShiftPressed}");
         }
 
         private void UpdateShiftButton()
         {
-            // Visual update for shift button would go here
         }
 
         private void OnKeyPressed(VirtualKeyEventArgs args)
