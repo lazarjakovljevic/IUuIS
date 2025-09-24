@@ -41,7 +41,6 @@ namespace NetworkService.Model
         #endregion
 
         #region Helpers
-        // Helper for ComboBox binding
         public static EntityType[] GetAllTypes()
         {
             return new EntityType[] { IntervalMeter, SmartMeter };
@@ -49,7 +48,6 @@ namespace NetworkService.Model
         #endregion
 
         #region Equality
-        // Object equality 
         public override bool Equals(object obj)
         {
             if (obj is EntityType other)
@@ -64,7 +62,6 @@ namespace NetworkService.Model
         #endregion
 
         #region Overrides
-        // ToString for display
         public override string ToString()
         {
             return Name ?? string.Empty;

@@ -33,7 +33,6 @@ namespace NetworkService.ViewModel
 
         public Action ScrollToTopAction { get; set; }
 
-        // Collections
         private ObservableCollection<PowerConsumptionEntity> entities;
         public ObservableCollection<PowerConsumptionEntity> Entities
         {
@@ -48,13 +47,9 @@ namespace NetworkService.ViewModel
             set { SetProperty(ref filteredEntities, value); }
         }
 
-
-
-        // Available types for ComboBox
         public ObservableCollection<EntityType> AvailableTypes { get; set; }
         public ObservableCollection<EntityType> FilterTypes { get; set; }
 
-        // Selected entity for deletion
         private PowerConsumptionEntity selectedEntity;
         public PowerConsumptionEntity SelectedEntity
         {
@@ -66,7 +61,6 @@ namespace NetworkService.ViewModel
             }
         }
 
-        // Form fields for new entity
         private string newEntityId;
         public string NewEntityId
         {
@@ -103,7 +97,6 @@ namespace NetworkService.ViewModel
             }
         }
 
-        // Validation messages
         private string idValidationMessage;
         public string IdValidationMessage
         {
@@ -125,7 +118,6 @@ namespace NetworkService.ViewModel
             set { SetProperty(ref typeValidationMessage, value); }
         }
 
-        // Filter properties
         private EntityType selectedFilterType;
         public EntityType SelectedFilterType
         {
@@ -143,22 +135,18 @@ namespace NetworkService.ViewModel
             get { return filterIdValue; }
             set
             {
-                // Filtriraj input - zadržava samo brojeve
                 string filteredValue = FilterNumericInput(value);
 
-                // Proveri da li je korisnik pokušao da unese nevalidan karakter
                 if (value != filteredValue)
                 {
-                    // Postavi error state jer je pokušao nevalidan unos
                     TriggerFilterIdError();
                 }
                 else
                 {
-                    // Ukloni error state jer je unos valjan
+
                     HasFilterIdError = false;
                 }
 
-                // Postavi samo validnu vrednost
                 SetProperty(ref filterIdValue, filteredValue);
                 ApplyFilters();
             }
@@ -172,7 +160,7 @@ namespace NetworkService.ViewModel
             {
                 if (SetProperty(ref isLessThanSelected, value) && value)
                 {
-                    // Set others to false
+
                     isGreaterThanSelected = false;
                     isEqualSelected = false;
                     OnPropertyChanged(nameof(IsGreaterThanSelected));
@@ -191,7 +179,7 @@ namespace NetworkService.ViewModel
             {
                 if (SetProperty(ref isGreaterThanSelected, value) && value)
                 {
-                    // Set others to false
+
                     isLessThanSelected = false;
                     isEqualSelected = false;
                     OnPropertyChanged(nameof(IsLessThanSelected));
@@ -210,7 +198,7 @@ namespace NetworkService.ViewModel
             {
                 if (SetProperty(ref isEqualSelected, value) && value)
                 {
-                    // Set others to false
+
                     isLessThanSelected = false;
                     isGreaterThanSelected = false;
                     OnPropertyChanged(nameof(IsLessThanSelected));
@@ -347,7 +335,6 @@ namespace NetworkService.ViewModel
 
         private void ValidateName()
         {
-            // Ako je polje prazno, ukloni poruku
             if (string.IsNullOrWhiteSpace(NewEntityName))
             {
                 NameValidationMessage = "";
@@ -365,14 +352,12 @@ namespace NetworkService.ViewModel
 
         private void ValidateType()
         {
-            // Ako tip nije selektovan, ukloni poruku
             if (NewEntityType == null)
             {
                 TypeValidationMessage = "";
                 return;
             }
 
-            // Nema drugih validacija za tip
             TypeValidationMessage = "";
         }
 
@@ -457,7 +442,6 @@ namespace NetworkService.ViewModel
 
             if (result == MessageBoxResult.Yes)
             {
-                // Use UndoManager instead of direct remove
                 var deleteCommand = new DeleteEntityCommand(Entities, SelectedEntity);
                 UndoManager.Instance.ExecuteCommand(deleteCommand);
 
@@ -484,14 +468,12 @@ namespace NetworkService.ViewModel
             var entity = item as PowerConsumptionEntity;
             if (entity == null) return false;
 
-            // Filter by type
             if (SelectedFilterType != null && !SelectedFilterType.Name.Equals("All Types"))
             {
                 if (!entity.Type.Equals(SelectedFilterType))
                     return false;
             }
 
-            // Filter by ID
             if (!string.IsNullOrWhiteSpace(FilterIdValue) && int.TryParse(FilterIdValue, out int filterValue))
             {
                 if (IsLessThanSelected && entity.Id >= filterValue) return false;

@@ -115,7 +115,6 @@ namespace NetworkService.Controls
                 string newText = currentText.Insert(caretIndex, keyValue);
                 TargetTextBox.Text = newText;
                 TargetTextBox.CaretIndex = caretIndex + keyValue.Length;
-                Console.WriteLine($"✏️ Character '{keyValue}' inserted");
             }
         }
 

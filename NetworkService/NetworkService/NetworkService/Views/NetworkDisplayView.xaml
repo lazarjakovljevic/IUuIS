@@ -42,7 +42,7 @@
             </Setter>
         </Style>
 
-        <!-- Danger Button Style (za Clear Network) -->
+        <!-- Danger Button Style -->
         <Style x:Key="DangerButton" TargetType="Button">
             <Setter Property="Background" Value="#BF616A"/>
             <Setter Property="Foreground" Value="White"/>
@@ -106,10 +106,8 @@
                           Height="680">
 
                     <TreeView.Resources>
-                        <!-- Gasi plavi sistemski highlight -->
                         <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
                             <Style.Resources>
-                                <!-- Ovime "maskiraš" defaultne highlight boje -->
                                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
                                 <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>
                                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
@@ -187,7 +185,7 @@
                 <!-- Container for Grid and Lines - Using a Canvas to overlay lines -->
                 <Canvas Name="NetworkContainer" Height="600" Width="360" Background="Transparent">
 
-                    <!-- Canvas for Connection Lines (behind entities) -->
+                    <!-- Canvas for Connection Lines -->
                     <Canvas Name="ConnectionLinesCanvas" 
                             Height="600" 
                             Width="360" 

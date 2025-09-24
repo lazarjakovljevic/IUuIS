@@ -25,13 +25,11 @@ namespace NetworkService.Commands
 
         public void Execute()
         {
-            // Selection is already done, this is just for tracking
             MeasurementGraphViewModel.Instance.SelectedEntity = newEntity;
         }
 
         public void Undo()
         {
-            // Set flag to prevent creating new undo command
             MeasurementGraphViewModel.Instance.SetSelectedEntitySilently(previousEntity);
         }
     }

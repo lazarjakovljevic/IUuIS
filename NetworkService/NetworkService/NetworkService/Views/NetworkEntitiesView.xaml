@@ -121,7 +121,7 @@
         <!-- Filter TextBox Style with Error State -->
         <Style x:Key="FilterTextBox" TargetType="TextBox" BasedOn="{StaticResource ModernTextBox}">
             <Style.Triggers>
-                <!-- Error State - crvena ivica -->
+                <!-- Error State -->
                 <DataTrigger Binding="{Binding HasFilterIdError}" Value="True">
                     <Setter Property="BorderBrush" Value="#BF616A"/>
                     <Setter Property="BorderThickness" Value="2"/>

@@ -24,12 +24,10 @@ namespace NetworkService.ViewModel
             }
         }
 
-        // Private constructor for singleton
         private NetworkDisplayViewModel()
         {
             LoadGroupedEntities();
 
-            // Subscribe to changes in shared entities
             if (SharedEntities != null)
             {
                 SharedEntities.CollectionChanged += OnSharedEntitiesChanged;
@@ -47,7 +45,6 @@ namespace NetworkService.ViewModel
             set { SetProperty(ref groupedEntities, value); }
         }
 
-        // Reference to shared entities
         public ObservableCollection<PowerConsumptionEntity> SharedEntities
         {
             get { return MainWindowViewModel.SharedEntities; }
@@ -64,9 +61,7 @@ namespace NetworkService.ViewModel
             get { return savedCanvasState ?? (savedCanvasState = new Dictionary<string, PowerConsumptionEntity>()); }
         }
 
-        /// <summary>
-        /// Čuva trenutno stanje Canvas-a
-        /// </summary>
+
         public void SaveCanvasState(Dictionary<Canvas, PowerConsumptionEntity> canvasEntityMap)
         {
             SavedCanvasState.Clear();
@@ -77,12 +72,8 @@ namespace NetworkService.ViewModel
                     SavedCanvasState[kvp.Key.Name] = kvp.Value;
                 }
             }
-            Console.WriteLine($"Saved state for {SavedCanvasState.Count} entities");
         }
 
-        /// <summary>
-        /// Vraća sačuvano stanje Canvas-a
-        /// </summary>
         public void RestoreCanvasState(Dictionary<Canvas, PowerConsumptionEntity> allCanvases,
                                       Action<Canvas, PowerConsumptionEntity> placeEntityCallback)
         {
@@ -91,7 +82,6 @@ namespace NetworkService.ViewModel
                 var canvas = allCanvases.Keys.FirstOrDefault(c => c.Name == kvp.Key);
                 if (canvas != null && kvp.Value != null)
                 {
-                    // Check if entity still exists in shared collection
                     var currentEntity = SharedEntities.FirstOrDefault(e => e.Id == kvp.Value.Id);
                     if (currentEntity != null)
                     {
@@ -99,7 +89,6 @@ namespace NetworkService.ViewModel
                     }
                 }
             }
-            Console.WriteLine($"Restored state for {SavedCanvasState.Count} entities");
         }
 
         #endregion
@@ -112,7 +101,6 @@ namespace NetworkService.ViewModel
 
             if (SharedEntities != null)
             {
-                // Group entities by type
                 var smartMeters = SharedEntities.Where(e => e.Type.Name.Contains("Smart")).ToList();
                 var intervalMeters = SharedEntities.Where(e => e.Type.Name.Contains("Interval")).ToList();
 
@@ -136,7 +124,6 @@ namespace NetworkService.ViewModel
 
         private void OnSharedEntitiesChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            // Refresh groupings when entities change
             LoadGroupedEntities();
         }
 
@@ -147,7 +134,6 @@ namespace NetworkService.ViewModel
 
         public void RemoveEntityFromTree(PowerConsumptionEntity entity)
         {
-            // Find and remove entity from appropriate group
             foreach (var group in GroupedEntities)
             {
                 if (group.Entities.Contains(entity))
@@ -161,7 +147,6 @@ namespace NetworkService.ViewModel
 
         public void AddEntityToTree(PowerConsumptionEntity entity)
         {
-            // Find appropriate group and add entity back
             var groupName = entity.Type.Name.Contains("Smart") ? "Smart Meters" : "Interval Meters";
             var group = GroupedEntities.FirstOrDefault(g => g.TypeName == groupName);
 
@@ -172,7 +157,6 @@ namespace NetworkService.ViewModel
             }
             else
             {
-                // If group doesn't exist, refresh all groupings
                 LoadGroupedEntities();
             }
         }

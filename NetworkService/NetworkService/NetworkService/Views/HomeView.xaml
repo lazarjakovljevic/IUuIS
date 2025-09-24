@@ -129,7 +129,7 @@
             </Grid>
 
             <!-- Status Info -->
-            <Border Background="#EBCB8B" 
+            <Border Background="#D9B37C " 
                     CornerRadius="8" 
                     Padding="15"
                     Margin="0,0,0,10">
@@ -147,7 +147,7 @@
             </Border>
 
             <!-- Quick Start -->
-            <Border Background="#A3BE8C" 
+            <Border Background="#81A1C1     " 
                     CornerRadius="8" 
                     Padding="15">
                 <StackPanel>

@@ -60,7 +60,7 @@ namespace NetworkService.Services
         {
             try
             {
-                // Parse message format: "Entitet_ID:Value" -> Example: "Entitet_1:1.55"
+                // "Entitet_ID:Value" -> Example: "Entitet_1:1.55"
                 if (string.IsNullOrEmpty(message) || !message.Contains(":"))
                 {
                     LogError($"Invalid message format: {message}");
@@ -89,20 +89,17 @@ namespace NetworkService.Services
                     return;
                 }
 
-                // Parse value
                 if (!double.TryParse(parts[1], out double value))
                 {
                     LogError($"Invalid value: {parts[1]}");
                     return;
                 }
 
-                // Find entity and update
                 var entity = entities.FirstOrDefault(e => e.Id == entityId);
                 if (entity != null)
                 {
                     var oldValue = entity.CurrentValue;
 
-                    // Update value on UI thread to ensure proper binding
                     System.Windows.Application.Current?.Dispatcher.Invoke(() =>
                     {
                         entity.CurrentValue = value;
@@ -134,9 +131,6 @@ namespace NetworkService.Services
             }
         }
 
-        /// <summary>
-        /// Loads last measurements from file and updates entity values
-        /// </summary>
         public void LoadLastMeasurementsFromFile(ObservableCollection<PowerConsumptionEntity> entities)
         {
             try
@@ -226,7 +220,7 @@ namespace NetworkService.Services
                     .Skip(Math.Max(0, allLines.Length - count)) // Take last N elements
                     .ToArray();
 
-                // Alternative approach - reverse, take, reverse back
+                // reverse, take, reverse back
                 var filteredLines = allLines
                     .Where(line => line.Contains($"Entity_ID: {entityId}") && !line.Contains("ERROR"))
                     .ToList();
@@ -258,12 +252,10 @@ namespace NetworkService.Services
                     allLines = File.ReadAllLines(LOG_FILE_PATH);
                 }
 
-                // Filter lines for specific entity and parse them
                 var entityLines = allLines
                     .Where(line => line.Contains($"Entity_ID: {entityId}") && !line.Contains("ERROR"))
                     .ToList();
 
-                // Take last 'count' measurements
                 var lastLines = entityLines.Skip(Math.Max(0, entityLines.Count - count)).ToList();
 
                 foreach (var line in lastLines)

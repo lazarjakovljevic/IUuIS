@@ -10,10 +10,6 @@ using System.Windows.Media;
 
 namespace NetworkService.Views
 {
-    /// <summary>
-    /// NetworkEntitiesView with VirtualKeyboard integration
-    /// Specifikacija: Mobilni interface sa virtuelnom tastaturom
-    /// </summary>
     public partial class NetworkEntitiesView : UserControl
     {
         #region Fields
@@ -45,20 +41,14 @@ namespace NetworkService.Views
 
         #region Virtual Keyboard Integration
 
-        /// <summary>
-        /// Initialize virtual keyboard service and register TextBox controls
-        /// </summary>
         private void InitializeVirtualKeyboard()
         {
             try
             {
-                // Get keyboard service instance
                 keyboardService = VirtualKeyboardService.Instance;
 
-                // Wait for UI to load before registering TextBoxes
                 this.Loaded += OnViewLoaded;
 
-                Console.WriteLine("NetworkEntitiesView: Virtual keyboard initialization started");
             }
             catch (Exception ex)
             {
@@ -66,31 +56,25 @@ namespace NetworkService.Views
             }
         }
 
-        /// <summary>
-        /// Handle view loaded event to register TextBoxes
-        /// </summary>
         private void OnViewLoaded(object sender, RoutedEventArgs e)
         {
             if (isInitialized) return;
 
             try
             {
-                // Initialize keyboard service with main container
+
                 var mainContainer = FindMainContainer();
                 if (mainContainer != null)
                 {
                     keyboardService.Initialize(mainContainer);
                 }
 
-                // Find and register TextBox controls
                 RegisterTextBoxControls();
 
-                // Subscribe to keyboard events
                 keyboardService.TextInput += OnVirtualKeyboardInput;
                 keyboardService.KeyboardVisibilityChanged += OnKeyboardVisibilityChanged;
 
                 isInitialized = true;
-                Console.WriteLine("NetworkEntitiesView: Virtual keyboard integration completed");
             }
             catch (Exception ex)
             {
@@ -98,30 +82,23 @@ namespace NetworkService.Views
             }
         }
 
-        /// <summary>
-        /// Find main container for keyboard display (usually MainWindow Grid)
-        /// </summary>
         private Panel FindMainContainer()
         {
             try
             {
-                // Traverse up the visual tree to find MainWindow
                 var current = this as DependencyObject;
                 while (current != null)
                 {
-                    current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+                    current = VisualTreeHelper.GetParent(current);
 
                     if (current is Window window)
                     {
-                        // Find main Grid in MainWindow
                         if (window.Content is Grid mainGrid)
                         {
-                            Console.WriteLine("Found MainWindow Grid for keyboard container");
                             return mainGrid;
                         }
                         else if (window.Content is Panel panel)
                         {
-                            Console.WriteLine("Found MainWindow Panel for keyboard container");
                             return panel;
                         }
                     }
@@ -137,14 +114,10 @@ namespace NetworkService.Views
             }
         }
 
-        /// <summary>
-        /// Find and register all TextBox controls for virtual keyboard
-        /// </summary>
         private void RegisterTextBoxControls()
         {
             try
             {
-                // Find TextBox controls by name or by traversing visual tree
                 var textBoxes = FindTextBoxes(this);
 
                 foreach (var textBox in textBoxes)
@@ -152,7 +125,6 @@ namespace NetworkService.Views
                     RegisterTextBox(textBox);
                 }
 
-                Console.WriteLine($"Registered {textBoxes.Count} TextBox controls for virtual keyboard");
             }
             catch (Exception ex)
             {
@@ -160,26 +132,19 @@ namespace NetworkService.Views
             }
         }
 
-        /// <summary>
-        /// Register individual TextBox with keyboard service
-        /// </summary>
         private void RegisterTextBox(TextBox textBox)
         {
             try
             {
-                // Set name for easier identification
                 if (string.IsNullOrEmpty(textBox.Name))
                 {
                     textBox.Name = $"TextBox_{Guid.NewGuid().ToString().Substring(0, 8)}";
                 }
 
-                // Register with keyboard service
                 keyboardService.RegisterTextBox(textBox);
 
-                // Add visual indicators for mobile interface
                 AddMobileIndicators(textBox);
 
-                Console.WriteLine($"TextBox registered: {textBox.Name}");
             }
             catch (Exception ex)
             {
@@ -187,20 +152,14 @@ namespace NetworkService.Views
             }
         }
 
-        /// <summary>
-        /// Add mobile-style visual indicators to TextBox
-        /// </summary>
         private void AddMobileIndicators(TextBox textBox)
         {
             try
             {
-                // Add tooltip indicating virtual keyboard usage
                 textBox.ToolTip = "Tap to open virtual keyboard";
 
-                // Add cursor change to indicate mobile interaction
-                textBox.Cursor = System.Windows.Input.Cursors.Hand;
+                textBox.Cursor = Cursors.Hand;
 
-                // You could also add an icon overlay here if needed
             }
             catch (Exception ex)
             {
@@ -208,24 +167,20 @@ namespace NetworkService.Views
             }
         }
 
-        /// <summary>
-        /// Recursively find all TextBox controls in visual tree
-        /// </summary>
         private System.Collections.Generic.List<TextBox> FindTextBoxes(DependencyObject parent)
         {
             var textBoxes = new System.Collections.Generic.List<TextBox>();
 
             try
             {
-                int childCount = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+                int childCount = VisualTreeHelper.GetChildrenCount(parent);
 
                 for (int i = 0; i < childCount; i++)
                 {
-                    var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                    var child = VisualTreeHelper.GetChild(parent, i);
 
                     if (child is TextBox textBox)
                     {
-                        // Skip read-only TextBoxes (they don't need virtual keyboard)
                         if (!textBox.IsReadOnly)
                         {
                             textBoxes.Add(textBox);
@@ -233,7 +188,6 @@ namespace NetworkService.Views
                     }
                     else
                     {
-                        // Recursively search children
                         textBoxes.AddRange(FindTextBoxes(child));
                     }
                 }
@@ -254,13 +208,10 @@ namespace NetworkService.Views
         {
             try
             {
-                // Proveri da li su svi karakteri brojevi
                 if (!IsTextAllowed(e.Text))
                 {
-                    // Blokiraj unos nevalidnih karaktera
                     e.Handled = true;
 
-                    // Postavi error state u ViewModel
                     if (DataContext is NetworkEntitiesViewModel viewModel)
                     {
                         viewModel.TriggerFilterIdError();
@@ -278,11 +229,6 @@ namespace NetworkService.Views
             return text.All(char.IsDigit);
         }
 
-
-
-        /// <summary>
-        /// Handle keyboard visibility changes - add bottom padding for ALL TextBoxes
-        /// </summary>
         private void OnKeyboardVisibilityChanged(object sender, KeyboardVisibilityEventArgs e)
         {
             try
@@ -293,10 +239,6 @@ namespace NetworkService.Views
                 {
                     if (e.IsVisible)
                     {
-                        // Always add padding when keyboard visible
-
-
-                        // Smart positioning based on TextBox type
                         if (IsFilterTextBox(e.TargetTextBox))
                         {
                             // Filter TextBox - scroll to middle
@@ -306,7 +248,7 @@ namespace NetworkService.Views
                         }
                         else
                         {
-                            scrollViewer.Padding = new Thickness(0, 0, 0, 275);
+                            scrollViewer.Padding = new Thickness(0, 0, 0, 275); // taman 280 px je tastatura, znaci malo manji padding 
                             // Entity form TextBoxes - scroll to bottom
                             scrollViewer.ScrollToBottom();
                             Console.WriteLine("Scrolled to bottom for entity form TextBox");
@@ -314,7 +256,6 @@ namespace NetworkService.Views
                     }
                     else
                     {
-                        // Remove padding and scroll to top when keyboard hidden
                         scrollViewer.Padding = new Thickness(0);
 
                     }
@@ -343,9 +284,6 @@ namespace NetworkService.Views
             return null;
         }
 
-        /// <summary>
-        /// Check if TextBox is filter TextBox (top of page)
-        /// </summary>
         private bool IsFilterTextBox(TextBox textBox)
         {
             if (textBox == null) return false;
@@ -356,7 +294,7 @@ namespace NetworkService.Views
                 if (binding?.ParentBinding?.Path?.Path != null)
                 {
                     var path = binding.ParentBinding.Path.Path;
-                    return path.Contains("Filter"); // Filter TextBox uses FilterIdValue binding
+                    return path.Contains("Filter");
                 }
 
                 return false;
@@ -367,16 +305,10 @@ namespace NetworkService.Views
             }
         }
 
-        /// <summary>
-        /// Handle virtual keyboard input
-        /// </summary>
         private void OnVirtualKeyboardInput(object sender, VirtualKeyEventArgs e)
         {
             try
             {
-                Console.WriteLine($"Virtual keyboard input: {e.Key} ({e.Action})");
-
-                // You can add custom handling for specific keys here
                 switch (e.Action)
                 {
                     case VirtualKeyAction.Enter:
@@ -393,9 +325,6 @@ namespace NetworkService.Views
             }
         }
 
-        /// <summary>
-        /// Handle Enter key from virtual keyboard
-        /// </summary>
         private void HandleEnterKey()
         {
             try
@@ -403,15 +332,13 @@ namespace NetworkService.Views
                 var activeTextBox = keyboardService.ActiveTextBox;
                 if (activeTextBox == null) return;
 
-                // Move focus to next control or trigger action
-                var nextControl = activeTextBox.PredictFocus(System.Windows.Input.FocusNavigationDirection.Next);
+                var nextControl = activeTextBox.PredictFocus(FocusNavigationDirection.Next);
                 if (nextControl is Control control)
                 {
                     control.Focus();
                 }
                 else
                 {
-                    // If no next control, try to trigger Add button if we're in add form
                     if (IsInAddEntityForm(activeTextBox))
                     {
                         TriggerAddEntity();
@@ -424,15 +351,11 @@ namespace NetworkService.Views
             }
         }
 
-        /// <summary>
-        /// Handle character input from virtual keyboard
-        /// </summary>
         private void HandleCharacterInput(string character)
         {
             try
             {
-                // Custom validation or formatting can be added here
-                // For now, the character is already handled by the TextBox
+                // karakter je handlovan od strane textboxa
             }
             catch (Exception ex)
             {
@@ -440,14 +363,10 @@ namespace NetworkService.Views
             }
         }
 
-        /// <summary>
-        /// Check if TextBox is in Add Entity form
-        /// </summary>
         private bool IsInAddEntityForm(TextBox textBox)
         {
             try
             {
-                // Check if TextBox is bound to add entity properties
                 var binding = textBox.GetBindingExpression(TextBox.TextProperty);
                 if (binding?.ParentBinding?.Path?.Path != null)
                 {
@@ -463,17 +382,13 @@ namespace NetworkService.Views
             return false;
         }
 
-        /// <summary>
-        /// Trigger Add Entity action from keyboard
-        /// </summary>
         private void TriggerAddEntity()
         {
             try
             {
-                // Get ViewModel and trigger add command
                 if (DataContext is NetworkEntitiesViewModel viewModel)
                 {
-                    var command = viewModel.AddEntityCommand as System.Windows.Input.ICommand;
+                    var command = viewModel.AddEntityCommand as ICommand;
                     if (command != null && command.CanExecute(null))
                     {
                         command.Execute(null);
@@ -490,7 +405,6 @@ namespace NetworkService.Views
         {
             try
             {
-                // Scroll to top
                 EntitiesScrollViewer.ScrollToTop();
             }
             catch (Exception ex)
@@ -505,9 +419,6 @@ namespace NetworkService.Views
 
         #region Cleanup
 
-        /// <summary>
-        /// Cleanup virtual keyboard integration
-        /// </summary>
         public void Cleanup()
         {
             try
@@ -517,7 +428,6 @@ namespace NetworkService.Views
                     keyboardService.TextInput -= OnVirtualKeyboardInput;
                     VirtualKeyboardService.Instance.KeyboardVisibilityChanged -= OnKeyboardVisibilityChanged;
 
-                    // Unregister all TextBoxes
                     var textBoxes = FindTextBoxes(this);
                     foreach (var textBox in textBoxes)
                     {
@@ -527,7 +437,6 @@ namespace NetworkService.Views
 
                 this.Loaded -= OnViewLoaded;
 
-                Console.WriteLine("NetworkEntitiesView: Virtual keyboard cleanup completed");
             }
             catch (Exception ex)
             {

@@ -31,7 +31,7 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="4">
                             <ContentPresenter HorizontalAlignment="Center" 
-                                            VerticalAlignment="Center"/>
+                                              VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <!-- Hover Effect -->
@@ -62,13 +62,13 @@
             </Setter>
         </Style>
 
-        <!-- Special Key Style (Space, Enter, etc.) -->
+        <!-- Special Key Style (Space, Shift) -->
         <Style x:Key="SpecialKeyStyle" TargetType="Button" BasedOn="{StaticResource KeyboardKeyStyle}">
-            <Setter Property="Background" Value="#FF404040"/>
+            <Setter Property="Background" Value="#DD222222  "/>
             <Setter Property="FontSize" Value="12"/>
         </Style>
 
-        <!-- Action Key Style (Backspace, Clear) -->
+        <!-- Action Key Style (Backspace, Clear, Esc) -->
         <Style x:Key="ActionKeyStyle" TargetType="Button" BasedOn="{StaticResource KeyboardKeyStyle}">
             <Setter Property="Background" Value="#FF8B4513"/>
             <Setter Property="FontSize" Value="12"/>
@@ -88,11 +88,11 @@
                 <RowDefinition Height="Auto"/>
                 <!-- Number Row -->
                 <RowDefinition Height="Auto"/>
-                <!-- First Letter Row (QWERTY) -->
+                <!-- First Letter Row -->
                 <RowDefinition Height="Auto"/>
-                <!-- Second Letter Row (ASDF) -->
+                <!-- Second Letter Row -->
                 <RowDefinition Height="Auto"/>
-                <!-- Third Letter Row (ZXCV) -->
+                <!-- Third Letter Row -->
                 <RowDefinition Height="Auto"/>
                 <!-- Space and Action Row -->
                 <RowDefinition Height="Auto"/>
@@ -104,8 +104,6 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
-                
 
                 <Button Grid.Column="1" 
                         Name="CloseButton"
@@ -132,7 +130,7 @@
             </UniformGrid>
             <!-- #endregion -->
 
-            <!-- #region First Letter Row (QWERTY) -->
+            <!-- #region First Letter Row -->
             <UniformGrid Grid.Row="2" Rows="1" Columns="10" Margin="0,0,0,4">
                 <Button Content="Q" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
                 <Button Content="W" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
@@ -147,7 +145,7 @@
             </UniformGrid>
             <!-- #endregion -->
 
-            <!-- #region Second Letter Row (ASDF) -->
+            <!-- #region Second Letter Row -->
             <Grid Grid.Row="3" Margin="0,0,0,4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="0.5*"/>
@@ -175,7 +173,7 @@
             </Grid>
             <!-- #endregion -->
 
-            <!-- #region Third Letter Row (ZXCV) -->
+            <!-- #region Third Letter Row -->
             <Grid Grid.Row="4" Margin="0,0,0,4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.5*"/>

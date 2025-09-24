@@ -85,7 +85,6 @@ namespace NetworkService.Services
 
             ConnectionAdded?.Invoke(connection);
 
-            Console.WriteLine($"Created connection: {fromEntity.Name} -> {toEntity.Name}");
             return true;
         }
         public void RemoveConnectionsForEntity(PowerConsumptionEntity entity)
@@ -102,7 +101,6 @@ namespace NetworkService.Services
                 RemoveConnection(connection);
             }
 
-            Console.WriteLine($"Removed {connectionsToRemove.Count} connections for entity {entity.Name}");
         }
         public bool RemoveConnection(Connection connection)
         {
@@ -119,7 +117,6 @@ namespace NetworkService.Services
             if (removed)
             {
                 ConnectionRemoved?.Invoke(connection);
-                Console.WriteLine($"Removed connection: {connection.FromEntity?.Name} -> {connection.ToEntity?.Name}");
             }
 
             return removed;
@@ -191,7 +188,6 @@ namespace NetworkService.Services
 
             connections.Clear();
 
-            Console.WriteLine("Cleared all connections");
         }
 
         public int GetConnectionCountForEntity(PowerConsumptionEntity entity)

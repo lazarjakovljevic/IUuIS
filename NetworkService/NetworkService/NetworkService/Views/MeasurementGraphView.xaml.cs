@@ -36,7 +36,6 @@ namespace NetworkService.Views
 
         private void DrawChart()
         {
-            // Clear previous chart
             ChartCanvas.Children.Clear();
 
             if (viewModel.Measurements == null || !viewModel.Measurements.Any())
@@ -128,24 +127,21 @@ namespace NetworkService.Views
             double barWidth = chartWidth / measurements.Count * 0.8; // 80% width, 20% spacing
             double spacing = chartWidth / measurements.Count * 0.2;
 
-            // Find max value for scaling
-            double maxValue = Math.Max(measurements.Max(m => m.Value), 3.0); // At least 3.0 for scale
+            double maxValue = Math.Max(measurements.Max(m => m.Value), 3.0); 
 
             for (int i = 0; i < measurements.Count; i++)
             {
                 var measurement = measurements[i];
 
-                // Calculate bar height (scaled to chart area)
                 double barHeight = (measurement.Value / maxValue) * chartHeight;
 
                 // Calculate bar position
                 double x = 50 + (i * (barWidth + spacing));
                 double y = ChartCanvas.Height - 40 - barHeight; // Start from bottom
 
-                // Choose color based on validity
                 Brush barColor = measurement.IsValid ? Brushes.Green : Brushes.Red;
 
-                // Create rectangle (bar)
+                // Create bar
                 var bar = new Rectangle
                 {
                     Width = barWidth,
@@ -159,7 +155,6 @@ namespace NetworkService.Views
                 Canvas.SetTop(bar, y);
                 ChartCanvas.Children.Add(bar);
 
-                // Add value label on top of bar
                 var valueLabel = new TextBlock
                 {
                     Text = measurement.Value.ToString("F2"),
@@ -183,16 +178,13 @@ namespace NetworkService.Views
             double barWidth = chartWidth / measurements.Count * 0.8;
             double spacing = chartWidth / measurements.Count * 0.2;
 
-            // Draw Y-axis scale labels
             DrawYAxisLabels();
 
-            // Draw X-axis time labels
             for (int i = 0; i < measurements.Count; i++)
             {
                 var measurement = measurements[i];
                 double x = 50 + (i * (barWidth + spacing));
 
-                // Time label
                 var timeLabel = new TextBlock
                 {
                     Text = measurement.Timestamp.ToString("HH:mm:ss"),
@@ -212,12 +204,10 @@ namespace NetworkService.Views
             double maxValue = Math.Max(measurements.Max(m => m.Value), 3.0);
             double chartHeight = ChartCanvas.Height - 60;
 
-            // Draw scale markers (0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0+)
             for (double value = 0; value <= maxValue; value += 0.5)
             {
                 double y = ChartCanvas.Height - 40 - (value / maxValue * chartHeight);
 
-                // Scale line
                 var scaleLine = new Line
                 {
                     X1 = 35,
@@ -229,7 +219,6 @@ namespace NetworkService.Views
                 };
                 ChartCanvas.Children.Add(scaleLine);
 
-                // Scale label
                 var scaleLabel = new TextBlock
                 {
                     Text = value.ToString("F1"),
@@ -241,7 +230,7 @@ namespace NetworkService.Views
                 Canvas.SetTop(scaleLabel, y - 7);
                 ChartCanvas.Children.Add(scaleLabel);
 
-                // Grid line (optional, light gray)
+                // Grid line 
                 if (value > 0)
                 {
                     var gridLine = new Line
@@ -263,7 +252,6 @@ namespace NetworkService.Views
 
         private void DrawValidRangeMarkers(double maxValue, double chartHeight)
         {
-            // Mark 0.34 and 2.73 on Y axis
             double[] validValues = { 0.34, 2.73 };
 
             foreach (double value in validValues)
@@ -272,7 +260,6 @@ namespace NetworkService.Views
                 {
                     double y = ChartCanvas.Height - 40 - (value / maxValue * chartHeight);
 
-                    // Colored scale line
                     var validLine = new Line
                     {
                         X1 = 35,
@@ -284,7 +271,6 @@ namespace NetworkService.Views
                     };
                     ChartCanvas.Children.Add(validLine);
 
-                    // Colored label
                     var validLabel = new TextBlock
                     {
                         Text = value.ToString("F2"),

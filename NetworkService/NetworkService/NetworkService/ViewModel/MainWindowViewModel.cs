@@ -24,10 +24,8 @@ namespace NetworkService.ViewModel
             set { SetProperty(ref currentViewModel, value); }
         }
 
-        // Shared entities collection for all ViewModels
         public static ObservableCollection<PowerConsumptionEntity> SharedEntities { get; set; }
 
-        // Reference to NetworkDisplayView for connection updates
         private NetworkDisplayView networkDisplayView;
 
         #endregion
@@ -42,7 +40,7 @@ namespace NetworkService.ViewModel
 
         #region TCP Communication
 
-        //private int count = 6; // Initial number of objects in system
+        //private int count = 6; 
         private MeasurementService measurementService;
 
         #endregion
@@ -54,16 +52,14 @@ namespace NetworkService.ViewModel
             InitializeServices();
             InitializeSharedData();
             InitializeCommands();
-            CreateListener(); // TCP connection setup
+            CreateListener(); 
 
-            // Subscribe to UndoManager events
             UndoManager.UndoStackChanged += () =>
             {
                 UndoCommand.RaiseCanExecuteChanged();
                 OnPropertyChanged(nameof(CanUndoActions)); 
             };
 
-            // Set initial view to home
             CurrentViewModel = new HomeViewModel();
         }
 
@@ -78,7 +74,6 @@ namespace NetworkService.ViewModel
                 SharedEntities = new ObservableCollection<PowerConsumptionEntity>();
                 LoadInitialEntities();
 
-                // Load last values from measurements file
                 measurementService.LoadLastMeasurementsFromFile(SharedEntities);
             }
         }
@@ -86,19 +81,18 @@ namespace NetworkService.ViewModel
         private void LoadInitialEntities()
         {
             // Load initial entities
-            SharedEntities.Add(new PowerConsumptionEntity(0, "Main Building Meter", EntityType.SmartMeter) { CurrentValue = 1.2 }); // NORMAL
-            SharedEntities.Add(new PowerConsumptionEntity(1, "Workshop Meter", EntityType.IntervalMeter) { CurrentValue = 2.1 }); // NORMAL
-            SharedEntities.Add(new PowerConsumptionEntity(2, "Office Complex", EntityType.SmartMeter) { CurrentValue = 0.2 }); // ALERT
-            SharedEntities.Add(new PowerConsumptionEntity(3, "Factory Line A", EntityType.IntervalMeter) { CurrentValue = 1.8 }); // NORMAL
-            SharedEntities.Add(new PowerConsumptionEntity(4, "Warehouse East", EntityType.SmartMeter) { CurrentValue = 3.1 }); // ALERT  
-            SharedEntities.Add(new PowerConsumptionEntity(5, "Server Room", EntityType.IntervalMeter) { CurrentValue = 0.9 }); // NORMAL
+            SharedEntities.Add(new PowerConsumptionEntity(0, "Main Building Meter", EntityType.SmartMeter) { CurrentValue = 1.2 });     // NORMAL
+            SharedEntities.Add(new PowerConsumptionEntity(1, "Workshop Meter", EntityType.IntervalMeter) { CurrentValue = 2.1 });       // NORMAL
+            SharedEntities.Add(new PowerConsumptionEntity(2, "Office Complex", EntityType.SmartMeter) { CurrentValue = 0.2 });          // ALERT
+            SharedEntities.Add(new PowerConsumptionEntity(3, "Factory Line A", EntityType.IntervalMeter) { CurrentValue = 1.8 });       // NORMAL
+            SharedEntities.Add(new PowerConsumptionEntity(4, "Warehouse East", EntityType.SmartMeter) { CurrentValue = 3.1 });          // ALERT  
+            SharedEntities.Add(new PowerConsumptionEntity(5, "Server Room", EntityType.IntervalMeter) { CurrentValue = 0.9 });          // NORMAL
         }
 
         private void InitializeServices()
         {
             measurementService = MeasurementService.Instance;
 
-            // Subscribe to measurement service events
             measurementService.MeasurementReceived += OnMeasurementReceived;
             measurementService.AlertTriggered += OnAlertTriggered;
         }
@@ -167,14 +161,12 @@ namespace NetworkService.ViewModel
                             {
                                 try
                                 {
-                                    // Receive message
                                     NetworkStream stream = tcpClient.GetStream();
                                     string incoming;
                                     byte[] bytes = new byte[1024];
                                     int i = stream.Read(bytes, 0, bytes.Length);
                                     incoming = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
 
-                                    // Process different message types
                                     if (incoming.Equals("Need object count"))
                                     {
                                         int maxIdPlusOne = 0;
@@ -186,14 +178,12 @@ namespace NetworkService.ViewModel
                                         byte[] data = System.Text.Encoding.ASCII.GetBytes(maxIdPlusOne.ToString());
                                         stream.Write(data, 0, data.Length);
 
-                                        Console.WriteLine($"Sent max ID + 1: {maxIdPlusOne}");
+                                        Console.WriteLine($"Sent: {maxIdPlusOne}");
                                     }
                                     else if (incoming.StartsWith("Entitet_") && incoming.Contains(":"))
                                     {
-                                        // Measurement data received
                                         Console.WriteLine($"Received measurement: {incoming}");
 
-                                        // Process through measurement service
                                         measurementService.ProcessTcpMessage(incoming, SharedEntities);
                                     }
                                     else
@@ -238,12 +228,10 @@ namespace NetworkService.ViewModel
 
         private void OnMeasurementReceived(PowerConsumptionEntity entity, double value)
         {
-            // This runs on background thread, so we need to dispatch to UI thread
             Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
-                    // Update NetworkEntitiesView if it's currently active
                     if (CurrentViewModel is NetworkEntitiesViewModel entitiesViewModel)
                     {
                         var entities = entitiesViewModel.Entities;
@@ -251,21 +239,15 @@ namespace NetworkService.ViewModel
 
                         if (index >= 0)
                         {
-                            // Remove and re-add to force DataGrid update
                             entities.RemoveAt(index);
                             entities.Insert(index, entity);
 
-                            // Also refresh the filtered view
                             entitiesViewModel.FilteredEntities?.Refresh();
                         }
                     }
 
-                    // Update NetworkDisplayView if it's currently active
                     if (CurrentViewModel is NetworkDisplayViewModel)
                     {
-                        // Find the actual NetworkDisplayView instance
-                        // Since we can't directly access the view from ViewModel in pure MVVM,
-                        // we'll use the measurement service to notify about value changes
                         UpdateNetworkDisplayConnections(entity);
                     }
 
@@ -321,17 +303,13 @@ namespace NetworkService.ViewModel
             Console.WriteLine($"Entity {entity.Name} (ID: {entity.Id}) was deleted from shared collection");
         }
 
-        /// <summary>
-        /// Handle entity addition to the shared collection
-        /// </summary>
         public static void OnEntityAdded(PowerConsumptionEntity entity)
         {
             if (entity == null) return;
 
             Console.WriteLine($"Entity {entity.Name} (ID: {entity.Id}) was added to shared collection");
 
-            // Entity will automatically appear in TreeView via data binding
-            // No connection management needed here since entity is not on network grid yet
+            // amin, databinding ce konacno bindovati entitete u treeview 
         }
 
         #endregion
@@ -346,16 +324,6 @@ namespace NetworkService.ViewModel
             }
 
             return $"Entities in system: {SharedEntities?.Count ?? 0}";
-        }
-
-        /// <summary>
-        /// Update entity count (called when entities are added/removed)
-        /// </summary>
-        public static void UpdateEntityCount()
-        {
-            // This method can be called when entities are added/removed
-            // to notify other components about count changes
-            Console.WriteLine($"Entity count updated: {SharedEntities?.Count ?? 0} entities");
         }
 
         #endregion

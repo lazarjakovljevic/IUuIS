@@ -57,7 +57,7 @@ namespace NetworkService.Model
         #region Constructors
         public PowerConsumptionEntity()
         {
-            CurrentValue = 1.5; // Safe default
+            CurrentValue = 1.5; // Default value
         }
 
         public PowerConsumptionEntity(int id, string name, EntityType type)
@@ -65,12 +65,11 @@ namespace NetworkService.Model
             Id = id;
             Name = name;
             Type = type;
-            CurrentValue = 1.5; // Safe default
+            CurrentValue = 1.5; // Default value
         }
         #endregion
 
         #region Static helpers
-        // Static validation helper
         public static bool IsValidValue(double value)
         {
             return value >= 0.34 && value <= 2.73;
@@ -78,7 +77,6 @@ namespace NetworkService.Model
         #endregion
 
         #region Equality
-        // Object equality 
         public override bool Equals(object obj)
         {
             if (obj is PowerConsumptionEntity other)
@@ -93,7 +91,6 @@ namespace NetworkService.Model
         #endregion
 
         #region Overrides
-        // ToString for display
         public override string ToString()
         {
             return $"{Name} (ID: {Id})";

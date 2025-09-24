@@ -163,8 +163,5 @@
   <ItemGroup>
     <Resource Include="Resources\Images\meter-tool.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="meter-tool.png" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

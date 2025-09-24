@@ -66,7 +66,7 @@ namespace NetworkService.ViewModel
                 {
                     LoadMeasurements();
 
-                    // Create undo command only if previous entity was not null (ignore first selection)
+                    // (ignore first selection)
                     if (!isSilentSelection && previousEntity != null && previousEntity != value)
                     {
                         var selectCommand = new SelectEntityCommand(previousEntity, value);

@@ -36,7 +36,6 @@ namespace NetworkService.Commands
             var networkView = NetworkDisplayView.Instance;
             if (networkView == null)
             {
-                Console.WriteLine("NetworkDisplayView instance not available for undo");
                 return;
             }
 

@@ -126,7 +126,6 @@ namespace NetworkService.Model
                 int row = Grid.GetRow(canvas);
                 int column = Grid.GetColumn(canvas);
 
-                // Fiksne dimenzije na osnovu XAML-a
                 double canvasWidth = 120; // 
                 double canvasHeight = 144; // Margin + height (3 * 8(MarginTop) = 24 Additional)
 

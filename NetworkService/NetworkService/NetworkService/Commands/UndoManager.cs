@@ -40,14 +40,8 @@ namespace NetworkService.Commands
 
         public bool CanUndo => undoStack.Count > 0;
 
-        /// <summary>
-        /// Gets description of the last action that can be undone
-        /// </summary>
         public string LastActionDescription => undoStack.Count > 0 ? undoStack.Peek().Description : "No actions to undo";
 
-        /// <summary>
-        /// Gets the number of actions in undo stack
-        /// </summary>
         public int UndoStackCount => undoStack.Count;
 
         #endregion
@@ -79,20 +73,15 @@ namespace NetworkService.Commands
 
             try
             {
-                // Execute the command
                 command.Execute();
 
-                // Add to undo stack
                 undoStack.Push(command);
 
-                // Limit stack size to prevent memory issues
                 LimitStackSize();
 
-                // Notify subscribers
                 UndoStackChanged?.Invoke();
                 CommandExecuted?.Invoke(command);
 
-                Console.WriteLine($"Executed: {command.Description} at {command.Timestamp:HH:mm:ss}");
             }
             catch (Exception ex)
             {
@@ -101,10 +90,6 @@ namespace NetworkService.Commands
             }
         }
 
-        /// <summary>
-        /// Undoes the last executed command
-        /// </summary>
-        /// <returns>True if undo was successful, false if no commands to undo</returns>
         public bool Undo()
         {
             if (!CanUndo)
@@ -117,46 +102,30 @@ namespace NetworkService.Commands
 
             try
             {
-                // Undo the command
                 command.Undo();
 
-                // Notify subscribers
                 UndoStackChanged?.Invoke();
                 CommandUndone?.Invoke(command);
 
-                Console.WriteLine($"Undone: {command.Description} (executed at {command.Timestamp:HH:mm:ss})");
                 return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error undoing command '{command.Description}': {ex.Message}");
 
-                // Put command back on stack since undo failed
                 undoStack.Push(command);
                 throw;
             }
         }
 
-        /// <summary>
-        /// Clears all commands from undo stack
-        /// </summary>
         public void Clear()
         {
             var count = undoStack.Count;
             undoStack.Clear();
 
             UndoStackChanged?.Invoke();
-            Console.WriteLine($"Cleared undo stack ({count} commands removed)");
         }
 
-        /// <summary>
-        /// Gets list of all commands in undo stack (for debugging/UI)
-        /// </summary>
-        /// <returns>List of command descriptions in chronological order</returns>
-        public List<string> GetUndoHistory()
-        {
-            return undoStack.Select(cmd => $"{cmd.Timestamp:HH:mm:ss} - {cmd.Description}").ToList();
-        }
 
         #endregion
 
@@ -173,7 +142,6 @@ namespace NetworkService.Commands
                     undoStack.Push(cmd);
                 }
 
-                Console.WriteLine($"Undo stack trimmed to {MAX_UNDO_STACK_SIZE} items");
             }
         }
 
