@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Input;
 
 namespace NetworkService.ViewModel
 {
@@ -230,6 +229,7 @@ namespace NetworkService.ViewModel
             {
                 keyboardService = VirtualKeyboardService.Instance;
                 keyboardService.TextInput += OnGlobalKeyboardInput;
+                keyboardService.KeyboardVisibilityChanged += OnGlobalKeyboardVisibilityChanged;
             }
             catch (Exception ex)
             {
@@ -257,12 +257,127 @@ namespace NetworkService.ViewModel
 
         #endregion
 
+        #region Scrolling Support
+
+        public Action ScrollToBottomAction { get; set; }
+        public Action<double> ScrollToVerticalOffsetAction { get; set; }
+        public Action<Thickness> SetScrollViewerPaddingAction { get; set; }
+
+        private void OnScrollToTopRequested()
+        {
+            try
+            {
+                ScrollToTopAction?.Invoke();
+                keyboardService.HideKeyboard();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error scrolling to top: {ex.Message}");
+            }
+        }
+
+        private void OnScrollToBottomRequested()
+        {
+            try
+            {
+                ScrollToBottomAction?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error scrolling to bottom: {ex.Message}");
+            }
+        }
+
+        private void SetScrollViewerPadding(Thickness padding)
+        {
+            try
+            {
+                SetScrollViewerPaddingAction?.Invoke(padding);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error setting scroll viewer padding: {ex.Message}");
+            }
+        }
+
+        private void ScrollTextBoxIntoView(System.Windows.Controls.TextBox textBox)
+        {
+            try
+            {
+                if (textBox != null)
+                {
+                    textBox.BringIntoView();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error scrolling TextBox into view: {ex.Message}");
+            }
+        }
+
+        private void OnGlobalKeyboardVisibilityChanged(object sender, KeyboardVisibilityEventArgs e)
+        {
+            try
+            {
+                if (e.IsVisible)
+                {
+                    var activeTextBox = keyboardService?.ActiveTextBox;
+                    if (activeTextBox != null)
+                    {
+                        if (IsFilterTextBox(activeTextBox))
+                        {
+                            var middlePosition = 0.75;
+                            ScrollToVerticalOffsetAction?.Invoke(middlePosition);
+                        }
+                        else
+                        {
+                            SetScrollViewerPadding(new Thickness(0, 0, 0, 275));
+                            OnScrollToBottomRequested();
+                        }
+
+                        ScrollTextBoxIntoView(activeTextBox);
+                    }
+                }
+                else
+                {
+                    SetScrollViewerPadding(new Thickness(0));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error handling keyboard visibility change: {ex.Message}");
+            }
+        }
+
+        private bool IsFilterTextBox(TextBox textBox)
+        {
+            if (textBox == null) return false;
+
+            try
+            {
+                var binding = textBox.GetBindingExpression(TextBox.TextProperty);
+                if (binding?.ParentBinding?.Path?.Path != null)
+                {
+                    var path = binding.ParentBinding.Path.Path;
+                    return path.Contains("Filter");
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        #endregion
+
         #region Constructor
         private NetworkEntitiesViewModel()
         {
             InitializeCollections();
             InitializeCommands();
             SetupFiltering();
+            InitializeVirtualKeyboard();
         }
         #endregion
 
@@ -331,16 +446,38 @@ namespace NetworkService.ViewModel
 
         public void TriggerFilterIdError()
         {
-            HasFilterIdError = true;
-
-            var timer = new System.Windows.Threading.DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(250);
-            timer.Tick += (s, e) =>
+            try
             {
-                HasFilterIdError = false;
-                timer.Stop();
-            };
-            timer.Start();
+                HasFilterIdError = true;
+
+                Task.Run(async () =>
+                {
+                    await Task.Delay(200);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        HasFilterIdError = false;
+                    });
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error triggering filter ID error: {ex.Message}");
+            }
+        }
+
+        public bool IsTextAllowed(string text)
+        {
+            return text.All(char.IsDigit);
+        }
+
+        public bool ValidateFilterIdInput(string input)
+        {
+            if (!IsTextAllowed(input))
+            {
+                TriggerFilterIdError();
+                return false;
+            }
+            return true;
         }
 
         private void ValidateId()
@@ -417,7 +554,7 @@ namespace NetworkService.ViewModel
         private void OnAddEntity()
         {
             try
-            { 
+            {
                 if (string.IsNullOrWhiteSpace(NewEntityId))
                 {
                     IdValidationMessage = "ID is required";
@@ -454,7 +591,7 @@ namespace NetworkService.ViewModel
                 MessageBox.Show("Entity added successfully!", "Success",
                     MessageBoxButton.OK, MessageBoxImage.Information);
 
-                ScrollToTopAction?.Invoke();
+                OnScrollToTopRequested();
             }
             catch (Exception ex)
             {
