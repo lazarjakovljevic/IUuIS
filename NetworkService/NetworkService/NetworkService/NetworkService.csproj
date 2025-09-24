@@ -160,5 +160,11 @@
     <Resource Include="Resources\Images\brojiloIntervala.png" />
     <Resource Include="Resources\Images\pametnoBrojilo.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\meter-tool.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="meter-tool.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
