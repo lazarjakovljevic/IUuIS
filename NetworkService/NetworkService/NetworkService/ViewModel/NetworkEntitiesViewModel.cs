@@ -245,7 +245,11 @@ namespace NetworkService.ViewModel
                 {
                     case VirtualKeyAction.Enter:
                         break;
+                    case VirtualKeyAction.Character:
+                        break;
                     case VirtualKeyAction.Backspace:
+                        break;
+                    case VirtualKeyAction.Shift:
                         break;
                 }
             }

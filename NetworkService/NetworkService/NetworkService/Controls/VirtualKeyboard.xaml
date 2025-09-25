@@ -2,11 +2,16 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:NetworkService.ViewModel"
              mc:Ignorable="d" 
              Height="280"
-             Width="605"
+             Width="600"
              d:DesignHeight="280" d:DesignWidth="580">
+
+    <UserControl.DataContext>
+        <vm:VirtualKeyboardViewModel/>
+    </UserControl.DataContext>
 
     <!-- #region Keyboard Resources -->
     <UserControl.Resources>
@@ -36,25 +41,13 @@
                         <ControlTemplate.Triggers>
                             <!-- Hover Effect -->
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="KeyBorder" Property="Background" Value="#FF0E7DAE"/>
-                                <Setter TargetName="KeyBorder" Property="BorderBrush" Value="#FF1BADF8"/>
-                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter TargetName="KeyBorder" Property="Background" Value="#FF3C3C3C"/>
+                                <Setter TargetName="KeyBorder" Property="BorderBrush" Value="#FF565656"/>
                             </Trigger>
                             <!-- Pressed Effect -->
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="KeyBorder" Property="Background" Value="#FF0A5A84"/>
-                                <Setter TargetName="KeyBorder" Property="BorderBrush" Value="#FF1BADF8"/>
-                                <Setter Property="RenderTransform">
-                                    <Setter.Value>
-                                        <ScaleTransform ScaleX="0.95" ScaleY="0.95"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                            <!-- Disabled -->
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="KeyBorder" Property="Background" Value="#FF1E1E1E"/>
-                                <Setter TargetName="KeyBorder" Property="BorderBrush" Value="#FF2A2A2A"/>
-                                <Setter Property="Foreground" Value="#FF808080"/>
+                                <Setter TargetName="KeyBorder" Property="Background" Value="#212429"/>
+                                <Setter TargetName="KeyBorder" Property="BorderBrush" Value="#333333"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -62,86 +55,101 @@
             </Setter>
         </Style>
 
-        <!-- Special Key Style (Space, Shift) -->
+        <!-- Special Key Style (Shift, Space etc.) -->
         <Style x:Key="SpecialKeyStyle" TargetType="Button" BasedOn="{StaticResource KeyboardKeyStyle}">
-            <Setter Property="Background" Value="#DD222222  "/>
+            <Setter Property="Background" Value="#363636 "/>
             <Setter Property="FontSize" Value="12"/>
         </Style>
 
-        <!-- Action Key Style (Backspace, Clear, Esc) -->
+        <!-- Action Key Style (Enter, Backspace) -->
         <Style x:Key="ActionKeyStyle" TargetType="Button" BasedOn="{StaticResource KeyboardKeyStyle}">
-            <Setter Property="Background" Value="#FF8B4513"/>
+            <Setter Property="Background" Value="#005B99"/>
             <Setter Property="FontSize" Value="12"/>
         </Style>
     </UserControl.Resources>
     <!-- #endregion -->
 
-    <!-- #region Main Keyboard Layout -->
+    <!-- #region Main Container -->
     <Border Background="#3B4252" 
-            CornerRadius="0"
-            Height="280" 
-            Margin="0,0,0,0">
-          
-        <Grid Margin="8,8,22,8">
+            BorderBrush="#3B4252" 
+            BorderThickness="1" 
+            CornerRadius="0">
+        <Grid Margin="8,8,20,8">
             <Grid.RowDefinitions>
-                <!-- Header with close button -->
                 <RowDefinition Height="Auto"/>
-                <!-- Number Row -->
-                <RowDefinition Height="Auto"/>
-                <!-- First Letter Row -->
-                <RowDefinition Height="Auto"/>
-                <!-- Second Letter Row -->
-                <RowDefinition Height="Auto"/>
-                <!-- Third Letter Row -->
-                <RowDefinition Height="Auto"/>
-                <!-- Space and Action Row -->
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- #region Header Row -->
-            <Grid Grid.Row="0" Margin="0,0,0,10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <Button Grid.Column="1" 
-                        Name="CloseButton"
-                        Content="✕" 
-                        Style="{StaticResource ActionKeyStyle}"
-                        Width="30" Height="25"
-                        Click="CloseButton_Click"
-                        ToolTip="Close virtual keyboard"/>
+            <!-- #region Header with Close Button -->
+            <Grid Grid.Row="0" Margin="0,0,0,8">
+                <TextBlock Text="Virtual Keyboard" 
+                           FontSize="14" 
+                           FontWeight="Bold" 
+                           Foreground="#FFF0F0F0" 
+                           HorizontalAlignment="Left" 
+                           VerticalAlignment="Center"/>
+                <Button Content="×" 
+                        Style="{StaticResource ActionKeyStyle}" 
+                        Width="25" 
+                        Height="25" 
+                        FontSize="16" 
+                        HorizontalAlignment="Right"
+                        Command="{Binding CloseKeyboardCommand}"
+                        ToolTip="Close"/>
             </Grid>
             <!-- #endregion -->
 
             <!-- #region Number Row -->
             <UniformGrid Grid.Row="1" Rows="1" Columns="10" Margin="0,0,0,4">
-                <Button Content="1" Style="{StaticResource KeyboardKeyStyle}" Click="NumberKey_Click"/>
-                <Button Content="2" Style="{StaticResource KeyboardKeyStyle}" Click="NumberKey_Click"/>
-                <Button Content="3" Style="{StaticResource KeyboardKeyStyle}" Click="NumberKey_Click"/>
-                <Button Content="4" Style="{StaticResource KeyboardKeyStyle}" Click="NumberKey_Click"/>
-                <Button Content="5" Style="{StaticResource KeyboardKeyStyle}" Click="NumberKey_Click"/>
-                <Button Content="6" Style="{StaticResource KeyboardKeyStyle}" Click="NumberKey_Click"/>
-                <Button Content="7" Style="{StaticResource KeyboardKeyStyle}" Click="NumberKey_Click"/>
-                <Button Content="8" Style="{StaticResource KeyboardKeyStyle}" Click="NumberKey_Click"/>
-                <Button Content="9" Style="{StaticResource KeyboardKeyStyle}" Click="NumberKey_Click"/>
-                <Button Content="0" Style="{StaticResource KeyboardKeyStyle}" Click="NumberKey_Click"/>
+                <Button Content="1" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="1"/>
+                <Button Content="2" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="2"/>
+                <Button Content="3" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="3"/>
+                <Button Content="4" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="4"/>
+                <Button Content="5" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="5"/>
+                <Button Content="6" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="6"/>
+                <Button Content="7" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="7"/>
+                <Button Content="8" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="8"/>
+                <Button Content="9" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="9"/>
+                <Button Content="0" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="0"/>
             </UniformGrid>
             <!-- #endregion -->
 
             <!-- #region First Letter Row -->
             <UniformGrid Grid.Row="2" Rows="1" Columns="10" Margin="0,0,0,4">
-                <Button Content="Q" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Content="W" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Content="E" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Content="R" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Content="T" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Content="Y" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Content="U" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Content="I" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Content="O" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Content="P" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
+                <Button Content="Q" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="Q"/>
+                <Button Content="W" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="W"/>
+                <Button Content="E" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="E"/>
+                <Button Content="R" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="R"/>
+                <Button Content="T" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="T"/>
+                <Button Content="Y" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="Y"/>
+                <Button Content="U" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="U"/>
+                <Button Content="I" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="I"/>
+                <Button Content="O" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="O"/>
+                <Button Content="P" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="P"/>
             </UniformGrid>
             <!-- #endregion -->
 
@@ -161,15 +169,24 @@
                     <ColumnDefinition Width="0.5*"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="1" Content="A" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="2" Content="S" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="3" Content="D" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="4" Content="F" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="5" Content="G" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="6" Content="H" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="7" Content="J" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="8" Content="K" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="9" Content="L" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
+                <Button Grid.Column="1" Content="A" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="A"/>
+                <Button Grid.Column="2" Content="S" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="S"/>
+                <Button Grid.Column="3" Content="D" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="D"/>
+                <Button Grid.Column="4" Content="F" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="F"/>
+                <Button Grid.Column="5" Content="G" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="G"/>
+                <Button Grid.Column="6" Content="H" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="H"/>
+                <Button Grid.Column="7" Content="J" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="J"/>
+                <Button Grid.Column="8" Content="K" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="K"/>
+                <Button Grid.Column="9" Content="L" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="L"/>
             </Grid>
             <!-- #endregion -->
 
@@ -187,15 +204,24 @@
                     <ColumnDefinition Width="1.5*"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0" Content="Shift" Style="{StaticResource SpecialKeyStyle}" Click="ShiftKey_Click"/>
-                <Button Grid.Column="1" Content="Z" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="2" Content="X" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="3" Content="C" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="4" Content="V" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="5" Content="B" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="6" Content="N" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="7" Content="M" Style="{StaticResource KeyboardKeyStyle}" Click="LetterKey_Click"/>
-                <Button Grid.Column="8" Content="⌫" Style="{StaticResource ActionKeyStyle}" Click="BackspaceKey_Click" ToolTip="Backspace"/>
+                <Button Grid.Column="0" Content="Shift" Style="{StaticResource SpecialKeyStyle}" 
+                        Command="{Binding ShiftKeyCommand}"/>
+                <Button Grid.Column="1" Content="Z" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="Z"/>
+                <Button Grid.Column="2" Content="X" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="X"/>
+                <Button Grid.Column="3" Content="C" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="C"/>
+                <Button Grid.Column="4" Content="V" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="V"/>
+                <Button Grid.Column="5" Content="B" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="B"/>
+                <Button Grid.Column="6" Content="N" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="N"/>
+                <Button Grid.Column="7" Content="M" Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="M"/>
+                <Button Grid.Column="8" Content="⌫" Style="{StaticResource ActionKeyStyle}" 
+                        Command="{Binding BackspaceKeyCommand}" ToolTip="Backspace"/>
             </Grid>
             <!-- #endregion -->
 
@@ -208,10 +234,12 @@
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
 
-
-                <Button Grid.Column="1" Content="Space" Style="{StaticResource SpecialKeyStyle}" Click="SpaceKey_Click"/>
-                <Button Grid.Column="2" Content="." Style="{StaticResource KeyboardKeyStyle}" Click="PeriodKey_Click"/>
-                <Button Grid.Column="3" Content="Enter" Style="{StaticResource ActionKeyStyle}" Click="EnterKey_Click"/>
+                <Button Grid.Column="1" Content="Space" Style="{StaticResource SpecialKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter=" "/>
+                <Button Grid.Column="2" Content="." Style="{StaticResource KeyboardKeyStyle}" 
+                        Command="{Binding KeyPressCommand}" CommandParameter="."/>
+                <Button Grid.Column="3" Content="Enter" Style="{StaticResource ActionKeyStyle}" 
+                        Command="{Binding EnterKeyCommand}"/>
             </Grid>
             <!-- #endregion -->
         </Grid>
