@@ -5,6 +5,7 @@ using NetworkService.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace NetworkService.ViewModel
@@ -27,14 +28,17 @@ namespace NetworkService.ViewModel
         #region Fields
         private readonly DispatcherTimer refreshTimer;
         private readonly MeasurementService measurementService;
+        private readonly ChartRenderingService chartRenderingService;
         private PowerConsumptionEntity selectedEntity;
-        private bool isSilentSelection = false; 
+        private bool isSilentSelection = false;
+        private Canvas chartCanvas;
         #endregion
 
         #region Constructor
         public MeasurementGraphViewModel()
         {
             measurementService = MeasurementService.Instance;
+            chartRenderingService = ChartRenderingService.Instance;
             LoadAvailableEntities();
 
             refreshTimer = new DispatcherTimer
@@ -80,7 +84,21 @@ namespace NetworkService.ViewModel
         public ObservableCollection<Measurement> Measurements
         {
             get { return measurements; }
-            set { SetProperty(ref measurements, value); }
+            set
+            {
+                SetProperty(ref measurements, value);
+                RefreshChart();
+            }
+        }
+
+        public Canvas ChartCanvas
+        {
+            get { return chartCanvas; }
+            set
+            {
+                SetProperty(ref chartCanvas, value);
+                RefreshChart();
+            }
         }
         #endregion
 
@@ -107,18 +125,20 @@ namespace NetworkService.ViewModel
                 LoadMeasurements();
             }
         }
+
         public void SetSelectedEntitySilently(PowerConsumptionEntity entity)
         {
             isSilentSelection = true;
             SelectedEntity = entity;
             isSilentSelection = false;
         }
-        #endregion
 
-        #region Cleanup
-        public void Cleanup()
+        public void RefreshChart()
         {
-            refreshTimer?.Stop();
+            if (ChartCanvas != null)
+            {
+                chartRenderingService.RenderChart(ChartCanvas, Measurements);
+            }
         }
         #endregion
     }
