@@ -462,36 +462,9 @@ namespace NetworkService.Services
 
         #endregion
 
-        #region Cleanup
-
-        public void Dispose()
-        {
-            try
-            {
-                HideKeyboard();
-
-                if (CurrentKeyboard != null)
-                {
-                    CurrentKeyboard.KeyPressed -= OnKeyboardKeyPressed;
-                    CurrentKeyboard.CloseRequested -= OnKeyboardCloseRequested;
-                }
-
-                KeyboardContainer?.Children.Remove(CurrentKeyboard);
-                CurrentKeyboard = null;
-                KeyboardContainer = null;
-                ActiveTextBox = null;
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error disposing VirtualKeyboardService: {ex.Message}");
-            }
-        }
-
-        #endregion
     }
 
-    #region Supporting Classes and Enums
+    #region Supporting Classes
 
     public class KeyboardVisibilityEventArgs : EventArgs
     {

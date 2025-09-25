@@ -156,31 +156,5 @@ namespace NetworkService.Model
         }
 
         #endregion
-
-        #region Equality
-
-        public override bool Equals(object obj)
-        {
-            if (obj is Connection other)
-            {
-                return (FromEntity?.Id == other.FromEntity?.Id && ToEntity?.Id == other.ToEntity?.Id) ||
-                       (FromEntity?.Id == other.ToEntity?.Id && ToEntity?.Id == other.FromEntity?.Id);
-            }
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            if (FromEntity == null || ToEntity == null)
-                return 0;
-
-            int id1 = FromEntity.Id;
-            int id2 = ToEntity.Id;
-
-            return id1 < id2 ? (id1, id2).GetHashCode() : (id2, id1).GetHashCode();
-        }
-
-        #endregion
-
     }
 }

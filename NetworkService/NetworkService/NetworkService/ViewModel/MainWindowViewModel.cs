@@ -328,25 +328,6 @@ namespace NetworkService.ViewModel
 
         #endregion
 
-        #region Cleanup
-
-        public void Cleanup()
-        {
-            if (measurementService != null)
-            {
-                measurementService.MeasurementReceived -= OnMeasurementReceived;
-                measurementService.AlertTriggered -= OnAlertTriggered;
-            }
-
-            if (networkDisplayView != null)
-            {
-                networkDisplayView.Cleanup();
-                networkDisplayView = null;
-            }
-        }
-
-        #endregion
-
         #region Undo Functionality
 
         private UndoManager undoManager;
