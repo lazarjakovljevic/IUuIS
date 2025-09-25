@@ -28,7 +28,7 @@ namespace NetworkService.Commands
 
         public void Execute()
         {
-            // Move is already done in drag&drop, this is just for tracking
+            // Move is already done in drag&drop
         }
 
         public void Undo()
@@ -41,17 +41,14 @@ namespace NetworkService.Commands
 
             if (fromCanvas == null)
             {
-                // Was moved from TreeView to Canvas - return to TreeView
                 networkView.RemoveEntityFromCanvasUndo(toCanvas, true);
             }
             else if (toCanvas == null)
             {
-                // Was moved from Canvas to TreeView - return to Canvas
                 networkView.PlaceEntityOnCanvasUndo(fromCanvas, entity);
             }
             else
             {
-                // Was moved from Canvas to Canvas - move back
                 networkView.RemoveEntityFromCanvasUndo(toCanvas, false);
                 networkView.PlaceEntityOnCanvasUndo(fromCanvas, entity);
             }
