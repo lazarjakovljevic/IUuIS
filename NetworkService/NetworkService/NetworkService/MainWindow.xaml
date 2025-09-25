@@ -10,6 +10,38 @@
         ResizeMode="CanMinimize"
         WindowStartupLocation="CenterScreen" Icon="/Resources/Images/meter-tool.png">
 
+    <Window.Resources>
+        <Style x:Key="NavigationButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="ButtonBorder" 
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="8">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- Hover Effect -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#4C566A"/>
+                            </Trigger>
+                            <!-- Pressed Effect -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#282D36"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <!-- Header bar with navigation -->
@@ -33,8 +65,7 @@
                 <!-- Home Button -->
                 <Button Grid.Column="0" 
                         Name="HomeButton"
-                        Background="Transparent" 
-                        BorderThickness="0"
+                        Style="{StaticResource NavigationButtonStyle}"
                         Command="{Binding HomeCommand}"
                         Cursor="Hand"
                         ToolTip="Home">
@@ -56,8 +87,7 @@
                 <!-- Undo Button -->
                 <Button Grid.Column="2" 
                         Name="UndoButton"
-                        Background="#2E3440" 
-                        BorderThickness="0"
+                        Style="{StaticResource NavigationButtonStyle}"
                         Command="{Binding UndoCommand}"
                         Cursor="Hand"
                         ToolTip="Undo">
@@ -105,13 +135,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Network Entities Button -->
                 <Button Grid.Column="0" 
-                        Background="Transparent" 
-                        BorderThickness="0"
+                        Style="{StaticResource NavigationButtonStyle}"
                         Command="{Binding NavCommand}"
-                        CommandParameter="entities"
-                        Cursor="Hand">
+                        CommandParameter="entities">
                     <StackPanel>
                         <TextBlock Text="📊" FontSize="20" HorizontalAlignment="Center" Foreground="White"/>
                         <TextBlock Text="Entities" FontSize="11" HorizontalAlignment="Center" Foreground="White"/>
@@ -120,8 +147,7 @@
 
                 <!-- Network Display Button -->
                 <Button Grid.Column="1" 
-                        Background="Transparent" 
-                        BorderThickness="0"
+                        Style="{StaticResource NavigationButtonStyle}"          
                         Command="{Binding NavCommand}"
                         CommandParameter="display"
                         Cursor="Hand">
@@ -133,8 +159,7 @@
 
                 <!-- Measurement Graph Button -->
                 <Button Grid.Column="2" 
-                        Background="Transparent" 
-                        BorderThickness="0"
+                        Style="{StaticResource NavigationButtonStyle}"
                         Command="{Binding NavCommand}"
                         CommandParameter="graph"
                         Cursor="Hand">

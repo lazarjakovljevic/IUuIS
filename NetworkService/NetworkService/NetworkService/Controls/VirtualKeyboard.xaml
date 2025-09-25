@@ -57,7 +57,7 @@
 
         <!-- Special Key Style (Shift, Space etc.) -->
         <Style x:Key="SpecialKeyStyle" TargetType="Button" BasedOn="{StaticResource KeyboardKeyStyle}">
-            <Setter Property="Background" Value="#363636 "/>
+            <Setter Property="Background" Value="#FF2D2D30 "/>
             <Setter Property="FontSize" Value="12"/>
         </Style>
 

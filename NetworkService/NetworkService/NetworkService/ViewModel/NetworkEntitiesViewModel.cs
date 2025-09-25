@@ -244,6 +244,10 @@ namespace NetworkService.ViewModel
                 switch (e.Action)
                 {
                     case VirtualKeyAction.Enter:
+                        if (ValidateFilterIdInput(FilterIdValue))
+                        {
+                            OnScrollToTopRequested();
+                        }
                         break;
                     case VirtualKeyAction.Character:
                         break;
@@ -476,11 +480,15 @@ namespace NetworkService.ViewModel
 
         public bool ValidateFilterIdInput(string input)
         {
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
+
             if (!IsTextAllowed(input))
             {
                 TriggerFilterIdError();
                 return false;
             }
+
             return true;
         }
 
@@ -666,7 +674,6 @@ namespace NetworkService.ViewModel
 
         private void ApplyFilters()
         {
-            Console.WriteLine($"Applying filters: Less={IsLessThanSelected}, Greater={IsGreaterThanSelected}, Equal={IsEqualSelected}, Value={FilterIdValue}");
 
             if (FilteredEntities != null)
             {

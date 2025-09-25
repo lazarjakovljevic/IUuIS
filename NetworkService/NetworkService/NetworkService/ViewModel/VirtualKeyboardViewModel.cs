@@ -1,9 +1,8 @@
-﻿#region Using directives
-using NetworkService.MVVM;
+﻿using NetworkService.MVVM;
 using System;
 using System.Windows.Controls;
 using System.Windows.Input;
-#endregion
+
 
 namespace NetworkService.ViewModel
 {
@@ -59,8 +58,21 @@ namespace NetworkService.ViewModel
             {
                 if (!string.IsNullOrEmpty(keyValue))
                 {
-                    SendKeyToTarget(keyValue);
-                    OnKeyPressed(new VirtualKeyEventArgs { Key = keyValue, Action = VirtualKeyAction.Character });
+                    string processedKey = keyValue;
+                    if (char.IsLetter(keyValue[0]))
+                    {
+                        processedKey = IsShiftPressed ? keyValue.ToUpper() : keyValue.ToLower();
+
+                        // (single-press shift behavior)
+                        if (IsShiftPressed)
+                        {
+                            IsShiftPressed = false;
+                            UpdateKeyboardMode();
+                        }
+                    }
+
+                    SendKeyToTarget(processedKey);
+                    OnKeyPressed(new VirtualKeyEventArgs { Key = processedKey, Action = VirtualKeyAction.Character });
                 }
             }
             catch (Exception ex)
@@ -131,12 +143,12 @@ namespace NetworkService.ViewModel
 
         private void UpdateLetterButtons()
         {
-            // Implementacija za ažuriranje dugmića slova
+            OnPropertyChanged(nameof(IsShiftPressed));
         }
 
         private void UpdateShiftButton()
         {
-            // Implementacija za ažuriranje Shift dugmeta
+            OnPropertyChanged(nameof(IsShiftPressed));
         }
 
         private void OnKeyPressed(VirtualKeyEventArgs args)

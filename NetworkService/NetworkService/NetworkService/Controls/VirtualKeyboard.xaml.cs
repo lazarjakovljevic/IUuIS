@@ -1,9 +1,7 @@
-﻿#region Using directives
-using NetworkService.ViewModel;
+﻿using NetworkService.ViewModel;
 using System;
 using System.Windows;
 using System.Windows.Controls;
-#endregion
 
 namespace NetworkService.Controls
 {

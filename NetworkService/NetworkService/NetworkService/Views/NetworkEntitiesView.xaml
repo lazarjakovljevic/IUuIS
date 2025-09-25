@@ -14,6 +14,7 @@
         <behaviors:VirtualKeyboardBehavior />
     </i:Interaction.Behaviors>
 
+
     <UserControl.Resources>
         <!-- Button Styles -->
         <Style x:Key="RoundedButton" TargetType="Button">
