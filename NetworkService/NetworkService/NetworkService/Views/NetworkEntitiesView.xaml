@@ -265,7 +265,7 @@
                      Text="{Binding FilterIdValue, UpdateSourceTrigger=PropertyChanged}" 
                      Style="{StaticResource FilterTextBox}"/>
 
-                                    <TextBlock Text="Enter ID here..." 
+                                    <TextBlock Text="Enter number for ID here..." 
                               Foreground="Gray" 
                               VerticalAlignment="Center" 
                               Margin="12,0,0,0"

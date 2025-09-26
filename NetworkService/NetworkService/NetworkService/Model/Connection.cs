@@ -130,8 +130,8 @@ namespace NetworkService.Model
                 double canvasHeight = 144; // Margin + height (3 * 8(MarginTop) = 24 Additional)
 
                 return new System.Windows.Point(
-                    column * canvasWidth + 60, // Centar of Canvas
-                    row * canvasHeight + 72    // Centar of Canvas
+                    column * canvasWidth + 60, // Centar of Canvas X
+                    row * canvasHeight + 72    // Centar of Canvas Y
                 );
             }
 

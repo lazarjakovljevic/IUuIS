@@ -486,6 +486,7 @@ namespace NetworkService.ViewModel
             if (!IsTextAllowed(input))
             {
                 TriggerFilterIdError();
+                
                 return false;
             }
 

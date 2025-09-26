@@ -36,13 +36,12 @@ namespace NetworkService.Model
             set
             {
                 SetProperty(ref currentValue, value);
-                // Notify related properties
+
                 OnPropertyChanged(nameof(IsValueValid));
                 OnPropertyChanged(nameof(ValueStatus));
             }
         }
 
-        // Computed properties
         public bool IsValueValid
         {
             get { return CurrentValue >= 0.34 && CurrentValue <= 2.73; }
@@ -69,32 +68,5 @@ namespace NetworkService.Model
         }
         #endregion
 
-        #region Static helpers
-        public static bool IsValidValue(double value)
-        {
-            return value >= 0.34 && value <= 2.73;
-        }
-        #endregion
-
-        #region Equality
-        public override bool Equals(object obj)
-        {
-            if (obj is PowerConsumptionEntity other)
-                return Id == other.Id;
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            return Id.GetHashCode();
-        }
-        #endregion
-
-        #region Overrides
-        public override string ToString()
-        {
-            return $"{Name} (ID: {Id})";
-        }
-        #endregion
     }
 }
